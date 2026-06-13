@@ -67,7 +67,6 @@ class AdminLayout extends StatelessWidget {
       body: SafeArea(
         child: Row(
           children: [
-            Expanded(child: child),
             SizedBox(
               width: 240,
               child: RightSideMenu(
@@ -75,6 +74,7 @@ class AdminLayout extends StatelessWidget {
                   selectedIndex: selectedIndex,
                   onTap: onSelect),
             ),
+            Expanded(child: child),
           ],
         ),
       ),

@@ -16,7 +16,7 @@ class ReportsAdminPage extends StatefulWidget {
 class _ReportsAdminPageState extends State<ReportsAdminPage> {
   late TextEditingController _searchController;
   int _currentPage = 1;
-  int _itemsPerPage = 10;
+  int _itemsPerPage = 100;
   bool _loading = false;
 
   @override
@@ -52,13 +52,14 @@ class _ReportsAdminPageState extends State<ReportsAdminPage> {
   Widget build(BuildContext context) {
     final reportProvider = context.watch<ReportProvider>();
     final reports = reportProvider.allReports;
-    
+
     // TODO: Implementar filtrado por búsqueda
     final filteredReports = reports;
-    
+
     final totalPages = (filteredReports.length / _itemsPerPage).ceil();
     final startIndex = (_currentPage - 1) * _itemsPerPage;
-    final endIndex = (startIndex + _itemsPerPage).clamp(0, filteredReports.length);
+    final endIndex =
+        (startIndex + _itemsPerPage).clamp(0, filteredReports.length);
     final paginatedReports = filteredReports.sublist(
       startIndex,
       endIndex,
@@ -66,7 +67,8 @@ class _ReportsAdminPageState extends State<ReportsAdminPage> {
 
     // TODO: Obtener datos reales de estadísticas
     final pendingCount = reports.where((r) => r.status == 'pending').length;
-    final inProgressCount = reports.where((r) => r.status == 'in_progress').length;
+    final inProgressCount =
+        reports.where((r) => r.status == 'in_progress').length;
     final resolvedCount = reports.where((r) => r.status == 'resolved').length;
 
     return SingleChildScrollView(
@@ -166,8 +168,8 @@ class _ReportsAdminPageState extends State<ReportsAdminPage> {
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      contentPadding:
-                          const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
                     ),
                     onChanged: (value) {
                       // TODO: Implementar búsqueda en tiempo real
@@ -176,33 +178,41 @@ class _ReportsAdminPageState extends State<ReportsAdminPage> {
                   ),
                 ),
                 const SizedBox(width: 16),
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.filter_list),
-                  label: const Text('Filtrar'),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                SizedBox(
+                  width: 120,
+                  child: ElevatedButton.icon(
+                    icon: const Icon(Icons.filter_list),
+                    label: const Text('Filtrar'),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
+                    onPressed: () {
+                      // TODO: Implementar diálogo de filtros avanzados
+                    },
                   ),
-                  onPressed: () {
-                    // TODO: Implementar diálogo de filtros avanzados
-                  },
                 ),
                 const SizedBox(width: 12),
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.download),
-                  label: const Text('Exportar'),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                SizedBox(
+                  width: 130,
+                  child: ElevatedButton.icon(
+                    icon: const Icon(Icons.download),
+                    label: const Text('Exportar'),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
+                    onPressed: () {
+                      // TODO: Implementar exportación de datos
+                    },
                   ),
-                  onPressed: () {
-                    // TODO: Implementar exportación de datos
-                  },
-                ),
+                )
               ],
             ),
             const SizedBox(height: 16),
@@ -255,13 +265,13 @@ class _ReportsAdminPageState extends State<ReportsAdminPage> {
                               child: Row(
                                 children: [
                                   _buildTableCell(
-                                    report.id,
+                                    report.folio,
                                     flex: 1,
                                     isBold: true,
                                     color: Colors.blue[700],
                                   ),
                                   _buildTableCell(
-                                    '${report.createdAt?.day ?? ''}/${report.createdAt?.month ?? ''}/${report.createdAt?.year ?? ''}',
+                                    '${report.reportedAt.day ?? ''}/${report.reportedAt.month ?? ''}/${report.reportedAt.year ?? ''}',
                                     flex: 1,
                                   ),
                                   _buildTableCell(
@@ -274,7 +284,10 @@ class _ReportsAdminPageState extends State<ReportsAdminPage> {
                                   ),
                                   Expanded(
                                     flex: 1,
-                                    child: _buildStatusBadge(report.status ?? 'pending'),
+                                    child: _buildStatusBadge(report.status
+                                        .toString()
+                                        .split('.')
+                                        .last),
                                   ),
                                   Expanded(
                                     flex: 1,
@@ -484,21 +497,24 @@ class _ReportsAdminPageState extends State<ReportsAdminPage> {
     final isSelected = _currentPage == pageNumber;
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 4),
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: isSelected ? Colors.blue[700] : Colors.white,
-          foregroundColor: isSelected ? Colors.white : Colors.grey[700],
-          elevation: isSelected ? 2 : 0,
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(4),
-            side: BorderSide(
-              color: isSelected ? Colors.blue[700]! : Colors.grey[300]!,
+      child: SizedBox(
+        width: 120,
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: isSelected ? Colors.blue[700] : Colors.white,
+            foregroundColor: isSelected ? Colors.white : Colors.grey[700],
+            elevation: isSelected ? 2 : 0,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(4),
+              side: BorderSide(
+                color: isSelected ? Colors.blue[700]! : Colors.grey[300]!,
+              ),
             ),
           ),
+          onPressed: () => setState(() => _currentPage = pageNumber),
+          child: Text(pageNumber.toString()),
         ),
-        onPressed: () => setState(() => _currentPage = pageNumber),
-        child: Text(pageNumber.toString()),
       ),
     );
   }
@@ -689,7 +705,11 @@ class _AssignDialogState extends State<AssignDialog> {
         TextButton(
             onPressed: () => Navigator.of(context).pop(false),
             child: const Text('Cancelar')),
-        ElevatedButton(onPressed: _assign, child: const Text('Asignar')),
+        SizedBox(
+          width: 120,
+          child:
+              ElevatedButton(onPressed: _assign, child: const Text('Asignar')),
+        ),
       ],
     );
   }

@@ -4,6 +4,7 @@ import '../services/report_service.dart';
 import '../services/user_service.dart';
 import 'admin_layout.dart';
 import 'reports_admin.dart';
+import 'reports_map.dart';
 
 class AdminHome extends StatefulWidget {
   const AdminHome({Key? key}) : super(key: key);
@@ -13,7 +14,13 @@ class AdminHome extends StatefulWidget {
 }
 
 class _AdminHomeState extends State<AdminHome> {
-  final List<String> _sections = ['Reportes', 'Usuarios', 'Medios', 'Ajustes'];
+  final List<String> _sections = [
+    'Reportes',
+    'Mapa',
+    'Usuarios',
+    'Medios',
+    'Ajustes'
+  ];
   int _selected = 0;
 
   // late final ApiService _apiService;
@@ -29,6 +36,8 @@ class _AdminHomeState extends State<AdminHome> {
     switch (_selected) {
       case 0:
         return ReportsAdminPage();
+      case 1:
+        return const ReportsMapPage();
       default:
         return Center(
             child: Text('Sección: ${_sections[_selected]} (pendiente)'));

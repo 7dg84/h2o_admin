@@ -9,12 +9,14 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  http: ^0.13.6
+  http: ^1.6.0
   provider: ^6.0.5
   shared_preferences: ^2.1.1
   intl: ^0.18.0
   dio: ^5.9.2
   dio_cookie_manager: ^3.4.0
+  flutter_map: ^6.0.0
+  latlong2: ^0.9.1
 
 dev_dependencies:
   flutter_test:
