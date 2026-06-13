@@ -1,0 +1,24 @@
+name: h2o_admin_flutter
+description: Aplicación de administración para h2o_chimal (Windows/Linux desktop)
+version: 0.1.0
+publish_to: 'none'
+
+environment:
+  sdk: '>=2.17.0 <3.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  http: ^0.13.6
+  provider: ^6.0.5
+  shared_preferences: ^2.1.1
+  intl: ^0.18.0
+  dio: ^5.9.2
+  dio_cookie_manager: ^3.4.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
