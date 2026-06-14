@@ -149,7 +149,7 @@ class _ReportsAdminPageState extends State<ReportsAdminPage> {
                 const SizedBox(width: 16),
                 _StatisticCard(
                   label: 'TIEMPO PROMEDIO',
-                  value: reportProvider.getAvrageTime().toString(),
+                  value: reportProvider.getAvrageTime().toStringAsFixed(1),
                   icon: Icons.schedule,
                   color: Colors.purple,
                   trend: '(Reportes actuales)',
@@ -167,7 +167,7 @@ class _ReportsAdminPageState extends State<ReportsAdminPage> {
                     controller: _searchController,
                     decoration: InputDecoration(
                       prefixIcon: const Icon(Icons.search),
-                      hintText: 'Buscar por folio o ubicación...',
+                      hintText: 'Buscar por folio, descripción, ubicación o curp...',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -175,8 +175,8 @@ class _ReportsAdminPageState extends State<ReportsAdminPage> {
                           horizontal: 16, vertical: 12),
                     ),
                     onChanged: (value) {
-                      // TODO: Implementar búsqueda en tiempo real
-                      setState(() => _currentPage = 1);
+                      // setState(() => _currentPage = 1);
+                      reportProvider.fetchAllReports(search: value);
                     },
                   ),
                 ),

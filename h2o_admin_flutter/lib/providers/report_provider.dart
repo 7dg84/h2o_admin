@@ -39,11 +39,11 @@ class ReportProvider with ChangeNotifier {
     }
   }
 
-  Future<void> fetchAllReports() async {
+  Future<void> fetchAllReports({String? search}) async {
     _isLoading = true;
     notifyListeners();
     try {
-      final data = await _reportService.getReports();
+      final data = await _reportService.getReports(search: search);
       _allReports = (data['results'] as List<dynamic>).cast<ReportModel>();
       _allReportsCount = data['count'] as int? ?? 0;
     } catch (e) {
@@ -273,6 +273,7 @@ class ReportProvider with ChangeNotifier {
         .map((r) => r.estimatedTime) // Extrae el tiempo estimado
         .toList()
         .where((t) => t != null) // Quita los nulos
+        .map((e) => e!.replaceAll('h', '').trim()) // quitamos la h
         .map((ts) => double.tryParse(ts!)) // Intenta convertir a número
         .whereType<double>() // Quita los que fallaron (fueron null)
         .toList();
