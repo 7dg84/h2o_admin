@@ -46,11 +46,22 @@ class ReportService {
     }
   }
 
-  Future<Map<String, dynamic>> getAllReports({int limit = 20}) async {
+  Future<Map<String, dynamic>> getReports({
+    String? search,
+    int page = 1,
+    int? limit,
+    String? status,
+    String? created_at,
+  }) async {
     try {
       final response = await _apiService.get('/reports/', queryParameters: {
-        'limit': limit,
-        'ordering': '-reported_at',
+        if (search != null && search.isNotEmpty) 'search': search,
+        if (limit != null && limit > 0) 'limit': limit,
+        'page': page,
+        if (status != null && status.isNotEmpty) 'status': status,
+        if (created_at != null && created_at.isNotEmpty)
+          'reported_at__gte'
+              'ordering': '-reported_at',
       });
 
       final int count = response.data['count'] ?? 0;

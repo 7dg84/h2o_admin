@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:h2o_admin_flutter/core/config.dart';
 import 'package:provider/provider.dart';
 import '../services/report_service.dart';
 import '../services/user_service.dart';
@@ -37,6 +38,9 @@ class _ReportsAdminPageState extends State<ReportsAdminPage> {
   void _loadData() {
     setState(() => _loading = true);
     context.read<ReportProvider>().fetchAllReports();
+    context.read<ReportProvider>().fetchPendingReports();
+    context.read<ReportProvider>().fetchAttentionReports();
+    context.read<ReportProvider>().fetchSolvedReports();
     setState(() => _loading = false);
   }
 
@@ -56,20 +60,19 @@ class _ReportsAdminPageState extends State<ReportsAdminPage> {
     // TODO: Implementar filtrado por búsqueda
     final filteredReports = reports;
 
-    final totalPages = (filteredReports.length / _itemsPerPage).ceil();
+    final totalPages = (reportProvider.allReportsCount / _itemsPerPage).ceil();
     final startIndex = (_currentPage - 1) * _itemsPerPage;
     final endIndex =
-        (startIndex + _itemsPerPage).clamp(0, filteredReports.length);
+        (startIndex + _itemsPerPage).clamp(0, reportProvider.allReportsCount);
     final paginatedReports = filteredReports.sublist(
       startIndex,
       endIndex,
     );
 
     // TODO: Obtener datos reales de estadísticas
-    final pendingCount = reports.where((r) => r.status == 'pending').length;
-    final inProgressCount =
-        reports.where((r) => r.status == 'in_progress').length;
-    final resolvedCount = reports.where((r) => r.status == 'resolved').length;
+    final pendingCount = reportProvider.pendingReportscount;
+    final inProgressCount = reportProvider.attentionReportsCount;
+    final resolvedCount = reportProvider.solvedReportsCount;
 
     return SingleChildScrollView(
       child: Padding(
@@ -125,7 +128,7 @@ class _ReportsAdminPageState extends State<ReportsAdminPage> {
                   value: pendingCount.toString(),
                   icon: Icons.warning_amber,
                   color: Colors.orange,
-                  trend: '+2 hoy',
+                  trend: 'hoy',
                 ),
                 const SizedBox(width: 16),
                 _StatisticCard(
@@ -133,7 +136,7 @@ class _ReportsAdminPageState extends State<ReportsAdminPage> {
                   value: inProgressCount.toString(),
                   icon: Icons.build,
                   color: Colors.blue,
-                  trend: '3 activos',
+                  trend: 'activos',
                 ),
                 const SizedBox(width: 16),
                 _StatisticCard(
@@ -141,15 +144,15 @@ class _ReportsAdminPageState extends State<ReportsAdminPage> {
                   value: resolvedCount.toString(),
                   icon: Icons.check_circle,
                   color: Colors.green,
-                  trend: '94% efec.',
+                  trend: 'Total',
                 ),
                 const SizedBox(width: 16),
                 _StatisticCard(
                   label: 'TIEMPO PROMEDIO',
-                  value: '4.5h',
+                  value: reportProvider.getAvrageTime().toString(),
                   icon: Icons.schedule,
                   color: Colors.purple,
-                  trend: '-15% vs ayer',
+                  trend: '(Reportes actuales)',
                 ),
               ],
             ),
@@ -284,15 +287,11 @@ class _ReportsAdminPageState extends State<ReportsAdminPage> {
                                   ),
                                   Expanded(
                                     flex: 1,
-                                    child: _buildStatusBadge(report.status
-                                        .toString()
-                                        .split('.')
-                                        .last),
+                                    child: _buildStatusBadge(report),
                                   ),
                                   Expanded(
                                     flex: 1,
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.end,
+                                    child: Wrap(
                                       children: [
                                         IconButton(
                                           tooltip: 'Asignar operador',
@@ -424,42 +423,17 @@ class _ReportsAdminPageState extends State<ReportsAdminPage> {
     );
   }
 
-  Widget _buildStatusBadge(String status) {
-    late Color bgColor;
-    late Color textColor;
-    late String label;
-
-    switch (status.toLowerCase()) {
-      case 'resolved':
-      case 'resuelto':
-        bgColor = Colors.red[50]!;
-        textColor = Colors.red;
-        label = 'Resuelto';
-        break;
-      case 'in_progress':
-      case 'en_revision':
-        bgColor = Colors.blue[50]!;
-        textColor = Colors.blue;
-        label = 'En revisión';
-        break;
-      case 'pending':
-      case 'pendiente':
-      default:
-        bgColor = Colors.amber[50]!;
-        textColor = Colors.amber[800]!;
-        label = 'Pendiente';
-    }
-
+  Widget _buildStatusBadge(ReportModel report) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: bgColor,
+        color: report.statusColor.withOpacity(0.6),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Text(
-        label,
+        report.statusText,
         style: TextStyle(
-          color: textColor,
+          color: report.statusColor,
           fontSize: 12,
           fontWeight: FontWeight.w500,
         ),

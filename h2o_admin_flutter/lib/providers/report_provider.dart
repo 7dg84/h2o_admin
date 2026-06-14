@@ -10,6 +10,9 @@ class ReportProvider with ChangeNotifier {
   List<ReportModel> _allReports = [];
   int _allReportsCount = 0;
   List<ReportCoordinate> _reportCoordinates = [];
+  int _pendingReportsCount = 0;
+  int _attentionReportsCount = 0;
+  int _solvedReportsCount = 0;
   bool _isLoading = false;
 
   ReportProvider(this._reportService);
@@ -19,6 +22,9 @@ class ReportProvider with ChangeNotifier {
   int get allReportsCount => _allReportsCount;
   List<ReportCoordinate> get reportCoordinates => _reportCoordinates;
   bool get isLoading => _isLoading;
+  int get pendingReportscount => _pendingReportsCount;
+  int get attentionReportsCount => _attentionReportsCount;
+  int get solvedReportsCount => _solvedReportsCount;
 
   Future<void> fetchRecentReports() async {
     _isLoading = true;
@@ -37,7 +43,7 @@ class ReportProvider with ChangeNotifier {
     _isLoading = true;
     notifyListeners();
     try {
-      final data = await _reportService.getAllReports();
+      final data = await _reportService.getReports();
       _allReports = (data['results'] as List<dynamic>).cast<ReportModel>();
       _allReportsCount = data['count'] as int? ?? 0;
     } catch (e) {
@@ -55,6 +61,55 @@ class ReportProvider with ChangeNotifier {
       _reportCoordinates = await _reportService.getReportCoordinates();
     } catch (e) {
       print("Error fetching report coordinates: $e");
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> fetchPendingReports() async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      final data =
+          await _reportService.getReports(status: 'Recibido', limit: 1);
+      _pendingReportsCount = data['count'] as int? ?? 0;
+    } catch (e) {
+      print("Error fetching all reports: $e");
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> fetchSolvedReports() async {
+    _isLoading = true;
+    notifyListeners();
+    final lastMonth = DateTime.now().subtract(Duration(days: 30));
+    try {
+      final data = await _reportService.getReports(
+          status: 'Resuelto',
+          created_at:
+              "${lastMonth.year}-${lastMonth.month.toString().padLeft(2, '0')}-${lastMonth.day.toString().padLeft(2, '0')}",
+          limit: 1);
+      _solvedReportsCount = data['count'] as int? ?? 0;
+    } catch (e) {
+      print("Error fetching all reports: $e");
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> fetchAttentionReports() async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      final data =
+          await _reportService.getReports(status: 'En atención', limit: 1);
+      _attentionReportsCount = data['count'] as int? ?? 0;
+    } catch (e) {
+      print("Error fetching all reports: $e");
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -210,6 +265,23 @@ class ReportProvider with ChangeNotifier {
     } finally {
       _isLoading = false;
       notifyListeners();
+    }
+  }
+
+  double getAvrageTime() {
+    List<double> allReportTime = allReports
+        .map((r) => r.estimatedTime) // Extrae el tiempo estimado
+        .toList()
+        .where((t) => t != null) // Quita los nulos
+        .map((ts) => double.tryParse(ts!)) // Intenta convertir a número
+        .whereType<double>() // Quita los que fallaron (fueron null)
+        .toList();
+    ;
+    if (allReportTime.isEmpty) {
+      return 0;
+    } else {
+      double avr = allReportTime.reduce((a, b) => a + b) / allReportTime.length;
+      return avr;
     }
   }
 }
