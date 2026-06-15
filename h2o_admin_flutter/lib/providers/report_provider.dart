@@ -39,11 +39,11 @@ class ReportProvider with ChangeNotifier {
     }
   }
 
-  Future<void> fetchAllReports({String? search}) async {
+  Future<void> fetchAllReports({String? search, int page=1}) async {
     _isLoading = true;
     notifyListeners();
     try {
-      final data = await _reportService.getReports(search: search);
+      final data = await _reportService.getReports(search: search, page: page,);
       _allReports = (data['results'] as List<dynamic>).cast<ReportModel>();
       _allReportsCount = data['count'] as int? ?? 0;
     } catch (e) {
