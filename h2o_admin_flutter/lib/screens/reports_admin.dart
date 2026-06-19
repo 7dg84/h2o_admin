@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:h2o_admin_flutter/core/config.dart';
+import 'package:h2o_admin_flutter/providers/user_provider.dart';
 import 'package:provider/provider.dart';
 import '../services/report_service.dart';
 import '../services/user_service.dart';
@@ -61,6 +62,7 @@ class _ReportsAdminPageState extends State<ReportsAdminPage> {
       });
       // TODO: Aplicar filtros llamando a fetchAllReports con los parámetros
       print(_filters);
+      context.read<ReportProvider>().fetchAllReports(filters: _filters);
     }
   }
 
@@ -607,26 +609,15 @@ class _AssignDialogState extends State<AssignDialog> {
   @override
   void initState() {
     super.initState();
-    _fetchOperators();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _fetchOperators();
+    });
   }
 
   Future<void> _fetchOperators([String? q]) async {
     setState(() => _loading = true);
     try {
-      // final list = await widget.userService.getOperators(query: q);
-      // for now return dummy data
-      final list = [
-        UserModel(
-            id: '1',
-            name: 'Operador 1',
-            email: 'op1@mail.com',
-            role: UserRole.operator),
-        UserModel(
-            id: '2',
-            name: 'Operador 2',
-            email: 'op2@mail.com',
-            role: UserRole.operator),
-      ];
+      final list = await context.read<UserProvider>().getOperators(q);
       setState(() => _operators = list);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -638,12 +629,15 @@ class _AssignDialogState extends State<AssignDialog> {
 
   Future<void> _assign() async {
     if (_selectedOperatorId == null) return;
+    print(_selectedOperatorId);
+    print(widget.reportId);
     setState(() => _loading = true);
     try {
-      final reportProvider = context.watch<ReportProvider>();
+      final reportProvider = context.read<ReportProvider>();
       await reportProvider.assignReport(widget.reportId, _selectedOperatorId!);
       Navigator.of(context).pop(true);
     } catch (e) {
+      print(e);
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('Error asignando: $e')));
     } finally {
@@ -723,7 +717,7 @@ class FilterDialog extends StatefulWidget {
 
 class _FilterDialogState extends State<FilterDialog> {
   late Map<String, dynamic> _filters;
-  late String? _ordering;
+  String? _ordering;
 
   // Controllers para campos de texto
   late TextEditingController _idController;
@@ -746,10 +740,10 @@ class _FilterDialogState extends State<FilterDialog> {
     'Cerrado'
   ];
   static const List<String> reportTypes = [
-    'superficial',
-    'tuberia',
-    'domiciliaria',
-    'obstruido',
+    'baja',
+    'media',
+    'alta',
+    'extrema',
   ];
   static const List<String> orderingFields = [
     'reported_at',
@@ -809,8 +803,11 @@ class _FilterDialogState extends State<FilterDialog> {
     if (_filters['assigned_operator_id'] != null) {
       _filters['assigned_operator_id'] = _filters['assigned_operator_id'];
     }
+    if (_ordering != null) {
+      _filters['ordering'] = _ordering;
+    }
 
-    Navigator.of(context).pop({..._filters, 'ordering': _ordering});
+    Navigator.of(context).pop({..._filters});
   }
 
   void _clearFilters() {
@@ -1055,7 +1052,7 @@ class _FilterDialogState extends State<FilterDialog> {
                 items: orderingFields
                     .map((f) => DropdownMenuItem(value: f, child: Text(f)))
                     .toList(),
-                onChanged: (v) => setState(() => _ordering = v),
+                onChanged: (v) => (_ordering = v),
                 decoration: InputDecoration(
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(6)),

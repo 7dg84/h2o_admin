@@ -46,23 +46,17 @@ class ReportService {
     }
   }
 
-  Future<Map<String, dynamic>> getReports({
-    String? search,
-    int page = 1,
-    int? limit,
-    String? status,
-    String? created_at,
-  }) async {
+  Future<Map<String, dynamic>> getReports(
+      {String? search,
+      int page = 1,
+      int? limit,
+      Map<String, dynamic>? filters}) async {
     try {
-      final response = await _apiService.get('/reports/', queryParameters: {
-        if (search != null && search.isNotEmpty) 'search': search,
-        if (limit != null && limit > 0) 'limit': limit,
-        'page': page,
-        if (status != null && status.isNotEmpty) 'status': status,
-        if (created_at != null && created_at.isNotEmpty)
-          'reported_at__gte'
-              'ordering': '-reported_at',
-      });
+      Map<String, dynamic> _filters = filters ?? {};
+      if (search != null && search.isNotEmpty) _filters['search'] = search;
+      if (limit != null && limit > 0) _filters['limit'] = limit;
+      _filters['page'] = page;
+      final response = await _apiService.get('/reports/', queryParameters: _filters);
 
       final int count = response.data['count'] ?? 0;
       final String next = response.data['next'] ?? '';
@@ -183,7 +177,7 @@ class ReportService {
   Future<void> assignReport(String reportId, String operatorId) async {
     try {
       await _apiService.post('/reports/$reportId/assign/', data: {
-        'operator': operatorId,
+        'operator_id': operatorId,
       });
     } catch (e) {
       rethrow;

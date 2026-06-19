@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:h2o_admin_flutter/providers/user_provider.dart';
+import 'package:h2o_admin_flutter/services/user_service.dart';
 import 'package:provider/provider.dart';
 // import 'services/api.dart';
 import 'screens/login.dart';
@@ -17,6 +19,7 @@ void main() async {
   final apiService = ApiService();
   final authService = AuthService(apiService);
   final reportService = ReportService(apiService);
+  final userService = UserService(apiService);
   // final tramiteService = TramiteService(apiService);
   // final serviceService = ServiceService(apiService);
 
@@ -24,6 +27,8 @@ void main() async {
     ChangeNotifierProvider(create: (_) => AuthProvider(authService)),
     ChangeNotifierProvider(create: (_) => NavigationProvider()),
     ChangeNotifierProvider(create: (_) => ReportProvider(reportService)),
+    ChangeNotifierProvider(create: (_) => UserProvider(userService)),
+
     // ChangeNotifierProvider(create: (_) => TramiteProvider(tramiteService)),
     // ChangeNotifierProvider(create: (_) => ServiceProvider(serviceService)),
   ], child: MyApp()));

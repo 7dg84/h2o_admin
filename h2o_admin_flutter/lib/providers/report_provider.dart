@@ -39,11 +39,19 @@ class ReportProvider with ChangeNotifier {
     }
   }
 
-  Future<void> fetchAllReports({String? search, int page=1}) async {
+  Future<void> fetchAllReports({
+    String? search,
+    int page = 1,
+    Map<String, dynamic>? filters,
+  }) async {
     _isLoading = true;
     notifyListeners();
     try {
-      final data = await _reportService.getReports(search: search, page: page,);
+      final data = await _reportService.getReports(
+        search: search,
+        page: page,
+        filters: filters,
+      );
       _allReports = (data['results'] as List<dynamic>).cast<ReportModel>();
       _allReportsCount = data['count'] as int? ?? 0;
     } catch (e) {
@@ -71,8 +79,9 @@ class ReportProvider with ChangeNotifier {
     _isLoading = true;
     notifyListeners();
     try {
-      final data =
-          await _reportService.getReports(status: 'Recibido', limit: 1);
+      final data = await _reportService.getReports(limit: 1, filters: {
+        'status': 'Recibido',
+      });
       _pendingReportsCount = data['count'] as int? ?? 0;
     } catch (e) {
       print("Error fetching all reports: $e");
@@ -87,11 +96,11 @@ class ReportProvider with ChangeNotifier {
     notifyListeners();
     final lastMonth = DateTime.now().subtract(Duration(days: 30));
     try {
-      final data = await _reportService.getReports(
-          status: 'Resuelto',
-          created_at:
-              "${lastMonth.year}-${lastMonth.month.toString().padLeft(2, '0')}-${lastMonth.day.toString().padLeft(2, '0')}",
-          limit: 1);
+      final data = await _reportService.getReports(limit: 1, filters: {
+        'status': 'Resuelto',
+        'created_at':
+            "${lastMonth.year}-${lastMonth.month.toString().padLeft(2, '0')}-${lastMonth.day.toString().padLeft(2, '0')}",
+      });
       _solvedReportsCount = data['count'] as int? ?? 0;
     } catch (e) {
       print("Error fetching all reports: $e");
@@ -106,7 +115,9 @@ class ReportProvider with ChangeNotifier {
     notifyListeners();
     try {
       final data =
-          await _reportService.getReports(status: 'En atención', limit: 1);
+          await _reportService.getReports(limit: 1, filters: {
+            'status': 'En atención',
+          });
       _attentionReportsCount = data['count'] as int? ?? 0;
     } catch (e) {
       print("Error fetching all reports: $e");
@@ -285,4 +296,10 @@ class ReportProvider with ChangeNotifier {
       return avr;
     }
   }
+
+  void toCSV() {
+    
+  }
+
+  
 }
