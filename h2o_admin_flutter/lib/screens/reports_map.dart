@@ -4,6 +4,8 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import '../models/report_model.dart';
 import '../providers/report_provider.dart';
+import '../core/routes.dart';
+import 'components/filter_dialog.dart';
 
 class ReportsMapPage extends StatefulWidget {
   const ReportsMapPage({super.key});
@@ -19,6 +21,7 @@ class _ReportsMapPageState extends State<ReportsMapPage> {
   int _itemsPerPage = 10;
   bool _loading = false;
   ReportModel? _selectedReport;
+  Map<String, dynamic> _filters = {};
 
   // Color mapping for report types
   static const Map<String, Color> reportTypeColors = {
@@ -45,7 +48,28 @@ class _ReportsMapPageState extends State<ReportsMapPage> {
   }
 
   Future<void> _loadData() async {
-    await context.read<ReportProvider>().fetchAllReports();
+    setState(() => _loading = true);
+    await context.read<ReportProvider>().fetchAllReports(
+          search: _searchController.text,
+          filters: _filters,
+        );
+    setState(() => _loading = false);
+  }
+
+  Future<void> _openFiltersDialog() async {
+    final result = await showDialog<Map<String, dynamic>>(
+      context: context,
+      builder: (ctx) => FilterDialog(
+        initialFilters: _filters,
+      ),
+    );
+    if (result != null) {
+      setState(() {
+        _filters = result;
+        _currentPage = 1;
+      });
+      _loadData();
+    }
   }
 
   Color _getMarkerColor(String type) {
@@ -90,50 +114,52 @@ class _ReportsMapPageState extends State<ReportsMapPage> {
     return Column(
       children: [
         // Search and Controls Bar
-        // Padding(
-        //   padding: const EdgeInsets.all(16.0),
-        //   child: Row(
-        //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        //     children: [
-        //       Expanded(
-        //         child: TextField(
-        //           controller: _searchController,
-        //           decoration: InputDecoration(
-        //             prefixIcon: const Icon(Icons.search),
-        //             hintText: 'Buscar por folio o ubicación...',
-        //             border: OutlineInputBorder(
-        //               borderRadius: BorderRadius.circular(8),
-        //             ),
-        //             contentPadding: const EdgeInsets.symmetric(
-        //                 horizontal: 16, vertical: 12),
-        //           ),
-        //           onChanged: (value) {
-        //             // TODO: Implementar búsqueda en tiempo real
-        //             setState(() => _currentPage = 1);
-        //           },
-        //         ),
-        //       ),
-        //       const SizedBox(width: 16),
-        //       SizedBox(
-        //         width: 120,
-        //         child: ElevatedButton.icon(
-        //           icon: const Icon(Icons.filter_list),
-        //           label: const Text('Filtrar'),
-        //           style: ElevatedButton.styleFrom(
-        //             padding: const EdgeInsets.symmetric(
-        //                 horizontal: 16, vertical: 12),
-        //             shape: RoundedRectangleBorder(
-        //               borderRadius: BorderRadius.circular(8),
-        //             ),
-        //           ),
-        //           onPressed: () {
-        //             // TODO: Implementar diálogo de filtros avanzados
-        //           },
-        //         ),
-        //       ),
-        //     ],
-        //   ),
-        // ),
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    prefixIcon: const Icon(Icons.search),
+                    hintText: 'Buscar por folio, descripción, ubicación o curp...',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
+                  ),
+                  // onChanged: (value) {
+                  //   setState(() => _currentPage = 1);
+                  //   _loadData();
+                  // },
+                  onSubmitted: (value) {
+                    setState(() => _currentPage = 1);
+                    _loadData();
+                  },
+                ),
+              ),
+              const SizedBox(width: 16),
+              SizedBox(
+                width: 120,
+                child: ElevatedButton.icon(
+                  icon: const Icon(Icons.filter_list),
+                  label: const Text('Filtrar'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  onPressed: _openFiltersDialog,
+                ),
+              ),
+            ],
+          ),
+        ),
 
         if (_loading)
           const Padding(
@@ -142,7 +168,7 @@ class _ReportsMapPageState extends State<ReportsMapPage> {
           ),
         // Map
         Expanded(
-          child: reports.isEmpty
+          child: filteredReports.isEmpty
               ? const Center(child: Text('No hay reportes para mostrar'))
               : Stack(
                   children: [
@@ -163,7 +189,7 @@ class _ReportsMapPageState extends State<ReportsMapPage> {
                           ),
                           MarkerLayer(
                             markers: [
-                              ...reports
+                              ...filteredReports
                                   .where((r) =>
                                       r.latitude != null && r.longitude != null)
                                   .map(
@@ -294,7 +320,14 @@ class _ReportsMapPageState extends State<ReportsMapPage> {
                                   ),
                                   TextButton(
                                     onPressed: () {
-                                      // TODO: Implementar navegación a detalle
+                                      Navigator.pushNamed(
+                                        context,
+                                        AppRoutes.reportDetail,
+                                        arguments: ReportDetailArguments(
+                                          reportId: _selectedReport!.id,
+                                          isEditMode: false,
+                                        ),
+                                      );
                                     },
                                     child: const Text('Ver detalles'),
                                   ),
