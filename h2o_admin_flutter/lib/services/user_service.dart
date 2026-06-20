@@ -28,7 +28,7 @@ class UserService {
       if (search != null && search.isNotEmpty) _filters['search'] = search;
       if (limit != null && limit > 0) _filters['limit'] = limit;
       _filters['page'] = page;
-      final response = await _apiService.get('/usrs/', queryParameters: _filters);
+      final response = await _apiService.get('/users/', queryParameters: _filters);
 
       final int count = response.data['count'] ?? 0;
       final String next = response.data['next'] ?? '';
@@ -38,6 +38,32 @@ class UserService {
         'results': results.map((json) => UserModel.fromJson(json)).toList(),
         'count': count,
       };
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<UserModel> create(Map<String, dynamic> userData) async {
+    try {
+      final response = await _apiService.post('/users/', data: userData);
+      return UserModel.fromJson(response.data);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<UserModel> update(String id, Map<String, dynamic> userData) async {
+    try {
+      final response = await _apiService.put('/users/$id/', data: userData);
+      return UserModel.fromJson(response.data);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> delete(String id) async {
+    try {
+      await _apiService.delete('/users/$id/');
     } catch (e) {
       rethrow;
     }

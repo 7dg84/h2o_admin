@@ -14,6 +14,10 @@ import 'providers/report_provider.dart';
 import 'services/api_service.dart';
 import 'services/auth_service.dart';
 import 'services/report_service.dart';
+import 'services/tramite_service.dart';
+import 'services/document_service.dart';
+import 'providers/tramite_provider.dart';
+import 'providers/document_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,7 +25,8 @@ void main() async {
   final authService = AuthService(apiService);
   final reportService = ReportService(apiService);
   final userService = UserService(apiService);
-  // final tramiteService = TramiteService(apiService);
+  final tramiteService = TramiteService(apiService);
+  final documentService = DocumentService(apiService);
   // final serviceService = ServiceService(apiService);
 
   runApp(MultiProvider(providers: [
@@ -30,7 +35,8 @@ void main() async {
     ChangeNotifierProvider(create: (_) => ReportProvider(reportService)),
     ChangeNotifierProvider(create: (_) => UserProvider(userService)),
 
-    // ChangeNotifierProvider(create: (_) => TramiteProvider(tramiteService)),
+    ChangeNotifierProvider(create: (_) => TramiteProvider(tramiteService)),
+    ChangeNotifierProvider(create: (_) => DocumentProvider(documentService)),
     // ChangeNotifierProvider(create: (_) => ServiceProvider(serviceService)),
   ], child: MyApp()));
 }

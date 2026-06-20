@@ -6,6 +6,7 @@ import '../models/user_model.dart';
 import '../providers/report_provider.dart';
 import '../core/routes.dart';
 import 'components/filter_dialog.dart';
+import 'components/statistic_card.dart';
 
 class ReportsAdminPage extends StatefulWidget {
   const ReportsAdminPage({super.key});
@@ -144,36 +145,44 @@ class _ReportsAdminPageState extends State<ReportsAdminPage> {
             // Statistics Cards
             Row(
               children: [
-                _StatisticCard(
-                  label: 'PENDIENTES',
-                  value: pendingCount.toString(),
-                  icon: Icons.warning_amber,
-                  color: Colors.orange,
-                  trend: 'hoy',
+                Expanded(
+                  child: StatisticCard(
+                    label: 'PENDIENTES',
+                    value: pendingCount.toString(),
+                    icon: Icons.warning_amber,
+                    color: Colors.orange,
+                    trend: 'hoy',
+                  ),
                 ),
                 const SizedBox(width: 16),
-                _StatisticCard(
-                  label: 'EN ATENCIÓN',
-                  value: inProgressCount.toString(),
-                  icon: Icons.build,
-                  color: Colors.blue,
-                  trend: 'activos',
+                Expanded(
+                  child: StatisticCard(
+                    label: 'EN ATENCIÓN',
+                    value: inProgressCount.toString(),
+                    icon: Icons.build,
+                    color: Colors.blue,
+                    trend: 'activos',
+                  ),
                 ),
                 const SizedBox(width: 16),
-                _StatisticCard(
-                  label: 'RESUELTAS (MES)',
-                  value: resolvedCount.toString(),
-                  icon: Icons.check_circle,
-                  color: Colors.green,
-                  trend: 'Total',
+                Expanded(
+                  child: StatisticCard(
+                    label: 'RESUELTAS (MES)',
+                    value: resolvedCount.toString(),
+                    icon: Icons.check_circle,
+                    color: Colors.green,
+                    trend: 'Total',
+                  ),
                 ),
                 const SizedBox(width: 16),
-                _StatisticCard(
-                  label: 'TIEMPO PROMEDIO',
-                  value: reportProvider.getAvrageTime().toStringAsFixed(1),
-                  icon: Icons.schedule,
-                  color: Colors.purple,
-                  trend: '(Reportes actuales)',
+                Expanded(
+                  child: StatisticCard(
+                    label: 'TIEMPO PROMEDIO',
+                    value: reportProvider.getAvrageTime().toStringAsFixed(1),
+                    icon: Icons.schedule,
+                    color: Colors.purple,
+                    trend: '(Reportes actuales)',
+                  ),
                 ),
               ],
             ),
@@ -579,78 +588,6 @@ class _ReportsAdminPageState extends State<ReportsAdminPage> {
           ),
           onPressed: () => setState(() => _currentPage = pageNumber),
           child: Text(pageNumber.toString()),
-        ),
-      ),
-    );
-  }
-}
-
-class _StatisticCard extends StatelessWidget {
-  final String label;
-  final String value;
-  final IconData icon;
-  final Color color;
-  final String trend;
-
-  const _StatisticCard({
-    required this.label,
-    required this.value,
-    required this.icon,
-    required this.color,
-    required this.trend,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.grey[200]!),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[600],
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: color.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Icon(icon, color: color, size: 20),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Text(
-              value,
-              style: const TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              trend,
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[500],
-              ),
-            ),
-          ],
         ),
       ),
     );

@@ -18,6 +18,11 @@ class UserProvider with ChangeNotifier {
 
   UserProvider(this._userService) {}
 
+  List<UserModel> get users => _users;
+  int get usersCount => _usersCount;
+  bool get isLoading => _isLoading;
+  String? get lastError => _lastError;
+
   Future<List<UserModel>> getOperators(
     String? search,
   ) async {
@@ -55,6 +60,57 @@ class UserProvider with ChangeNotifier {
     } finally {
       _isLoading = false;
       notifyListeners();
+    }
+  }
+
+  Future<bool> createUser(Map<String, dynamic> userData) async {
+    _isLoading = true;
+    _lastError = null;
+    notifyListeners();
+    try {
+      await _userService.create(userData);
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _lastError = e.toString();
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> updateUser(String id, Map<String, dynamic> userData) async {
+    _isLoading = true;
+    _lastError = null;
+    notifyListeners();
+    try {
+      await _userService.update(id, userData);
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _lastError = e.toString();
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> deleteUser(String id) async {
+    _isLoading = true;
+    _lastError = null;
+    notifyListeners();
+    try {
+      await _userService.delete(id);
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _lastError = e.toString();
+      _isLoading = false;
+      notifyListeners();
+      return false;
     }
   }
 }
