@@ -15,7 +15,7 @@ class UsersAdminPage extends StatefulWidget {
 class _UsersAdminPageState extends State<UsersAdminPage> {
   final TextEditingController _searchController = TextEditingController();
   int _currentPage = 1;
-  final int _itemsPerPage = 10;
+  final int _itemsPerPage = 100;
   bool _loading = false;
   Map<String, dynamic> _filters = {};
 

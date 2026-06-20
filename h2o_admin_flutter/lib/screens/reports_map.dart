@@ -18,7 +18,7 @@ class _ReportsMapPageState extends State<ReportsMapPage> {
   late TextEditingController _searchController;
   final MapController _mapController = MapController();
   int _currentPage = 1;
-  int _itemsPerPage = 10;
+  int _itemsPerPage = 100;
   bool _loading = false;
   ReportModel? _selectedReport;
   Map<String, dynamic> _filters = {};

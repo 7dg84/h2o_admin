@@ -4,6 +4,7 @@ import 'reports_admin.dart';
 import 'reports_map.dart';
 import 'users_admin.dart';
 import 'tramites_admin.dart';
+import 'reviews_admin.dart';
 
 class AdminHome extends StatefulWidget {
   const AdminHome({Key? key}) : super(key: key);
@@ -18,7 +19,7 @@ class _AdminHomeState extends State<AdminHome> {
     'Mapa',
     'Usuarios',
     'Trámites',
-    'Medios',
+    'Reseñas',
     'Ajustes'
   ];
   int _selected = 0;
@@ -38,6 +39,8 @@ class _AdminHomeState extends State<AdminHome> {
         return const UsersAdminPage();
       case 3:
         return const TramitesAdminPage();
+      case 4:
+        return const ReviewsAdminPage();
       default:
         return Center(
             child: Text('Sección: ${_sections[_selected]} (pendiente)'));
