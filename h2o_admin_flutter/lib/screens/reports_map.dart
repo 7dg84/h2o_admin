@@ -22,10 +22,10 @@ class _ReportsMapPageState extends State<ReportsMapPage> {
 
   // Color mapping for report types
   static const Map<String, Color> reportTypeColors = {
-    'Superficial': Colors.blue,
-    'Tuberia': Colors.teal,
-    'Domiciliaria': Colors.orange,
-    'Obstruido': Colors.red,
+    'alta': Colors.blue,
+    'media': Colors.teal,
+    'baja': Colors.orange,
+    'extrema': Colors.red,
   };
 
   @override
@@ -50,13 +50,13 @@ class _ReportsMapPageState extends State<ReportsMapPage> {
 
   Color _getMarkerColor(String type) {
     switch (type) {
-      case 'superficial':
+      case 'baja':
         return Colors.blue;
-      case 'tuberia':
+      case 'media':
         return Colors.teal;
-      case 'domiciliaria':
+      case 'alta':
         return Colors.orange;
-      case 'obstruido':
+      case 'extrema':
         return Colors.red;
       default:
         return Colors.grey;
