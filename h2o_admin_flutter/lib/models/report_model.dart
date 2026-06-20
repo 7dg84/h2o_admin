@@ -6,6 +6,7 @@ enum ReportStatus { recibido, enRevision, enAtencion, resuelto, cerrado }
 
 class ReportModel {
   final String id;
+  final String user;
   final String folio;
   final DateTime reportedAt;
   final double latitude;
@@ -21,6 +22,7 @@ class ReportModel {
 
   ReportModel({
     required this.id,
+    required this.user,
     required this.folio,
     required this.reportedAt,
     required this.latitude,
@@ -38,6 +40,7 @@ class ReportModel {
   factory ReportModel.fromJson(Map<String, dynamic> json) {
     return ReportModel(
       id: json['id'],
+      user: json['user'],
       folio: json['folio'].toString(),
       reportedAt: DateTime.parse(json['reported_at']),
       latitude: double.parse(json['latitude'].toString()),
@@ -71,21 +74,31 @@ class ReportModel {
 
   String get statusText {
     switch (status) {
-      case ReportStatus.enRevision: return 'En revisión';
-      case ReportStatus.enAtencion: return 'En atención';
-      case ReportStatus.resuelto: return 'Resuelto';
-      case ReportStatus.cerrado: return 'Cerrado';
-      default: return 'Recibido';
+      case ReportStatus.enRevision:
+        return 'En revisión';
+      case ReportStatus.enAtencion:
+        return 'En atención';
+      case ReportStatus.resuelto:
+        return 'Resuelto';
+      case ReportStatus.cerrado:
+        return 'Cerrado';
+      default:
+        return 'Recibido';
     }
   }
 
   Color get statusColor {
     switch (status) {
-      case ReportStatus.enRevision: return AppConfig.statusInReview;
-      case ReportStatus.enAtencion: return AppConfig.statusInAttention;
-      case ReportStatus.resuelto: return AppConfig.statusResolved;
-      case ReportStatus.cerrado: return AppConfig.statusClosed;
-      default: return AppConfig.statusPending;
+      case ReportStatus.enRevision:
+        return AppConfig.statusInReview;
+      case ReportStatus.enAtencion:
+        return AppConfig.statusInAttention;
+      case ReportStatus.resuelto:
+        return AppConfig.statusResolved;
+      case ReportStatus.cerrado:
+        return AppConfig.statusClosed;
+      default:
+        return AppConfig.statusPending;
     }
   }
 }

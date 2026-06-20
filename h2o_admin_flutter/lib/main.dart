@@ -7,6 +7,7 @@ import 'screens/login.dart';
 import 'screens/reports_list.dart';
 import 'screens/admin_home.dart';
 import 'core/config.dart';
+import 'core/routes.dart';
 import 'providers/navigation_provider.dart';
 import 'providers/auth_provider.dart';
 import 'providers/report_provider.dart';
@@ -92,18 +93,7 @@ class MyApp extends StatelessWidget {
           return auth.isAuthenticated ? const AdminHome() : const LoginScreen();
         },
       ),
-      // onGenerateRoute: (settings) {
-      //   if (settings.name == '/report-detail') {
-      //     final reportId = settings.arguments as String;
-      //     return MaterialPageRoute(
-      //       builder: (context) => ReportDetailScreen(reportId: reportId),
-      //     );
-      //   }
-      // },
-      routes: {
-        '/reports': (context) => const AdminHome(),
-        '/admin': (context) => const AdminHome(),
-      },
+      onGenerateRoute: AppRoutes.generateRoute,
     );
   }
 }

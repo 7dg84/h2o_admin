@@ -587,9 +587,27 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
                 Expanded(
                   child: _buildInfoItem(
                     label: 'Reportado por (Usuario)',
-                    child: Text(
-                      _report!.description.split(' ').first, // standard fallback or id
-                      style: const TextStyle(fontSize: 14),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            _report!.user,
+                            style: const TextStyle(fontSize: 14, fontFamily: 'monospace'),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.copy, size: 16),
+                          onPressed: () {
+                            Clipboard.setData(ClipboardData(text: _report!.user));
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('ID copiado al portapapeles'), duration: Duration(seconds: 1)),
+                            );
+                          },
+                          tooltip: 'Copiar ID',
+                          splashRadius: 18,
+                        ),
+                      ],
                     ),
                   ),
                 ),

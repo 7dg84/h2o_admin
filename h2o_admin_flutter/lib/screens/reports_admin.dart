@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import '../models/report_model.dart';
 import '../models/user_model.dart';
 import '../providers/report_provider.dart';
-import 'report_detail.dart';
+import '../core/routes.dart';
 
 class ReportsAdminPage extends StatefulWidget {
   const ReportsAdminPage({super.key});
@@ -39,7 +39,7 @@ class _ReportsAdminPageState extends State<ReportsAdminPage> {
 
   void _loadData() {
     setState(() => _loading = true);
-    context.read<ReportProvider>().fetchAllReports();
+    context.read<ReportProvider>().fetchAllReports(search: _searchController.text, filters: _filters);
     context.read<ReportProvider>().fetchPendingReports();
     context.read<ReportProvider>().fetchAttentionReports();
     context.read<ReportProvider>().fetchSolvedReports();
@@ -196,7 +196,11 @@ class _ReportsAdminPageState extends State<ReportsAdminPage> {
                           horizontal: 16, vertical: 12),
                     ),
                     onChanged: (value) {
-                      // setState(() => _currentPage = 1);
+                      setState(() => _currentPage = 1);
+                      reportProvider.fetchAllReports(search: value);
+                    },
+                    onSubmitted: (value) {
+                      setState(() => _currentPage = 1);
                       reportProvider.fetchAllReports(search: value);
                     },
                   ),
@@ -324,13 +328,12 @@ class _ReportsAdminPageState extends State<ReportsAdminPage> {
                                         IconButton(
                                           tooltip: 'Ver detalle',
                                           onPressed: () {
-                                            Navigator.push(
+                                            Navigator.pushNamed(
                                               context,
-                                              MaterialPageRoute(
-                                                builder: (context) => ReportDetailScreen(
-                                                  reportId: report.id,
-                                                  isEditMode: false,
-                                                ),
+                                              AppRoutes.reportDetail,
+                                              arguments: ReportDetailArguments(
+                                                reportId: report.id,
+                                                isEditMode: false,
                                               ),
                                             ).then((value) {
                                               if (value == true) {
@@ -345,13 +348,12 @@ class _ReportsAdminPageState extends State<ReportsAdminPage> {
                                         IconButton(
                                           tooltip: 'Editar',
                                           onPressed: () {
-                                            Navigator.push(
+                                            Navigator.pushNamed(
                                               context,
-                                              MaterialPageRoute(
-                                                builder: (context) => ReportDetailScreen(
-                                                  reportId: report.id,
-                                                  isEditMode: true,
-                                                ),
+                                              AppRoutes.reportDetail,
+                                              arguments: ReportDetailArguments(
+                                                reportId: report.id,
+                                                isEditMode: true,
                                               ),
                                             ).then((value) {
                                               if (value == true) {
