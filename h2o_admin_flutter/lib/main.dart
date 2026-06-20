@@ -17,9 +17,17 @@ import 'services/report_service.dart';
 import 'services/tramite_service.dart';
 import 'services/document_service.dart';
 import 'services/review_service.dart';
+import 'services/document_type_service.dart';
+import 'services/service_service.dart';
+import 'services/service_requirement_service.dart';
+import 'services/payment_service.dart';
 import 'providers/tramite_provider.dart';
 import 'providers/document_provider.dart';
 import 'providers/review_provider.dart';
+import 'providers/document_type_provider.dart';
+import 'providers/service_provider.dart';
+import 'providers/service_requirement_provider.dart';
+import 'providers/payment_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,7 +38,10 @@ void main() async {
   final tramiteService = TramiteService(apiService);
   final documentService = DocumentService(apiService);
   final reviewService = ReviewService(apiService);
-  // final serviceService = ServiceService(apiService);
+  final documentTypeService = DocumentTypeService(apiService);
+  final serviceService = ServiceService(apiService);
+  final serviceRequirementService = ServiceRequirementService(apiService);
+  final paymentService = PaymentService(apiService);
 
   runApp(MultiProvider(providers: [
     ChangeNotifierProvider(create: (_) => AuthProvider(authService)),
@@ -41,7 +52,10 @@ void main() async {
     ChangeNotifierProvider(create: (_) => TramiteProvider(tramiteService)),
     ChangeNotifierProvider(create: (_) => DocumentProvider(documentService)),
     ChangeNotifierProvider(create: (_) => ReviewProvider(reviewService)),
-    // ChangeNotifierProvider(create: (_) => ServiceProvider(serviceService)),
+    ChangeNotifierProvider(create: (_) => DocumentTypeProvider(documentTypeService)),
+    ChangeNotifierProvider(create: (_) => ServiceProvider(serviceService)),
+    ChangeNotifierProvider(create: (_) => ServiceRequirementProvider(serviceRequirementService)),
+    ChangeNotifierProvider(create: (_) => PaymentProvider(paymentService)),
   ], child: MyApp()));
 }
 
