@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../screens/login.dart';
 import '../screens/admin_home.dart';
 import '../screens/report_detail.dart';
+import '../screens/tramite_detail.dart';
 
 /// Nombres de rutas de la aplicación
 class AppRoutes {
@@ -10,6 +11,7 @@ class AppRoutes {
   static const String reports = '/reports';
   static const String admin = '/admin';
   static const String reportDetail = '/report-detail';
+  static const String tramiteDetail = '/tramite-detail';
 
   /// Generador de rutas
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -35,6 +37,15 @@ class AppRoutes {
           ),
           settings: settings,
         );
+      case tramiteDetail:
+        final args = settings.arguments as TramiteDetailArguments;
+        return MaterialPageRoute(
+          builder: (_) => TramiteDetailScreen(
+            tramiteId: args.tramiteId,
+            isEditMode: args.isEditMode,
+          ),
+          settings: settings,
+        );
       default:
         return MaterialPageRoute(
           builder: (_) => Scaffold(
@@ -54,6 +65,16 @@ class ReportDetailArguments {
 
   ReportDetailArguments({
     required this.reportId,
+    this.isEditMode = false,
+  });
+}
+
+class TramiteDetailArguments {
+  final String tramiteId;
+  final bool isEditMode;
+
+  TramiteDetailArguments({
+    required this.tramiteId,
     this.isEditMode = false,
   });
 }

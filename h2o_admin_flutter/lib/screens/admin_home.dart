@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import '../services/api_service.dart';
-import '../services/report_service.dart';
-import '../services/user_service.dart';
 import 'admin_layout.dart';
 import 'reports_admin.dart';
 import 'reports_map.dart';
 import 'users_admin.dart';
+import 'tramites_admin.dart';
 
 class AdminHome extends StatefulWidget {
   const AdminHome({Key? key}) : super(key: key);
@@ -19,14 +17,11 @@ class _AdminHomeState extends State<AdminHome> {
     'Reportes',
     'Mapa',
     'Usuarios',
+    'Trámites',
     'Medios',
     'Ajustes'
   ];
   int _selected = 0;
-
-  // late final ApiService _apiService;
-  late final ReportService _reportService;
-  late final UserService _userService;
 
   @override
   void initState() {
@@ -41,6 +36,8 @@ class _AdminHomeState extends State<AdminHome> {
         return const ReportsMapPage();
       case 2:
         return const UsersAdminPage();
+      case 3:
+        return const TramitesAdminPage();
       default:
         return Center(
             child: Text('Sección: ${_sections[_selected]} (pendiente)'));
