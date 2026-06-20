@@ -119,6 +119,10 @@ class ReportService {
     required String? locationText,
     required String? reportType,
     required String? description,
+    String? status,
+    String? assignedOperatorId,
+    String? estimatedTime,
+    String? notes,
   }) async {
     try {
       final Map<String, dynamic> data = {};
@@ -127,6 +131,12 @@ class ReportService {
       if (locationText != null) data['location_text'] = locationText;
       if (reportType != null) data['report_type'] = reportType;
       if (description != null) data['description'] = description;
+      if (status != null) data['status'] = status;
+      if (assignedOperatorId != null) {
+        data['assigned_operator_id'] = assignedOperatorId.isEmpty ? null : assignedOperatorId;
+      }
+      if (estimatedTime != null) data['estimated_time_interval'] = estimatedTime;
+      if (notes != null) data['notes'] = notes;
 
       final response = await _apiService.put('/reports/$id/', data: data);
       return ReportModel.fromJson(response.data);

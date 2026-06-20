@@ -26,17 +26,18 @@ class _LoginScreenState extends State<LoginScreen> {
             _passCtrl.text,
           );
 
+      // Verificación de seguridad inmediata después del await
+      if (!mounted) return;
+
       if (success) {
-        if (mounted) Navigator.pop(context);
+        Navigator.pop(context);
       } else {
         final err = context.read<AuthProvider>().lastError;
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-                content: Text(
-                    err ?? 'Error de autenticación. Verifique sus datos.')),
-          );
-        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content:
+                  Text(err ?? 'Error de autenticación. Verifique sus datos.')),
+        );
       }
     }
   }

@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:h2o_admin_flutter/core/config.dart';
 import 'package:h2o_admin_flutter/providers/user_provider.dart';
 import 'package:provider/provider.dart';
-import '../services/report_service.dart';
-import '../services/user_service.dart';
 import '../models/report_model.dart';
 import '../models/user_model.dart';
 import '../providers/report_provider.dart';
+import 'report_detail.dart';
 
 class ReportsAdminPage extends StatefulWidget {
   const ReportsAdminPage({super.key});
@@ -326,7 +324,19 @@ class _ReportsAdminPageState extends State<ReportsAdminPage> {
                                         IconButton(
                                           tooltip: 'Ver detalle',
                                           onPressed: () {
-                                            // TODO: Implementar vista de detalle
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) => ReportDetailScreen(
+                                                  reportId: report.id,
+                                                  isEditMode: false,
+                                                ),
+                                              ),
+                                            ).then((value) {
+                                              if (value == true) {
+                                                _loadData();
+                                              }
+                                            });
                                           },
                                           icon: const Icon(Icons.visibility),
                                           iconSize: 20,
@@ -335,7 +345,19 @@ class _ReportsAdminPageState extends State<ReportsAdminPage> {
                                         IconButton(
                                           tooltip: 'Editar',
                                           onPressed: () {
-                                            // TODO: Implementar edición
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) => ReportDetailScreen(
+                                                  reportId: report.id,
+                                                  isEditMode: true,
+                                                ),
+                                              ),
+                                            ).then((value) {
+                                              if (value == true) {
+                                                _loadData();
+                                              }
+                                            });
                                           },
                                           icon: const Icon(Icons.edit),
                                           iconSize: 20,
@@ -343,8 +365,52 @@ class _ReportsAdminPageState extends State<ReportsAdminPage> {
                                         ),
                                         IconButton(
                                           tooltip: 'Eliminar',
-                                          onPressed: () {
-                                            // TODO: Implementar eliminación
+                                          onPressed: () async {
+                                            final confirm = await showDialog<bool>(
+                                              context: context,
+                                              builder: (ctx) => AlertDialog(
+                                                title: const Text('Eliminar reporte'),
+                                                content: Text(
+                                                    '¿Estás seguro de que deseas eliminar el reporte #${report.folio}?'),
+                                                actions: [
+                                                  TextButton(
+                                                    onPressed: () =>
+                                                        Navigator.of(ctx).pop(false),
+                                                    child: const Text('Cancelar'),
+                                                  ),
+                                                  ElevatedButton(
+                                                    style: ElevatedButton.styleFrom(
+                                                      backgroundColor: Colors.red,
+                                                      foregroundColor: Colors.white,
+                                                    ),
+                                                    onPressed: () =>
+                                                        Navigator.of(ctx).pop(true),
+                                                    child: const Text('Eliminar'),
+                                                  ),
+                                                ],
+                                              ),
+                                            );
+                                            if (confirm == true) {
+                                              final success = await context
+                                                  .read<ReportProvider>()
+                                                  .deleteReport(report.id);
+                                              if (success) {
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                  const SnackBar(
+                                                    content: Text(
+                                                        'Reporte eliminado con éxito'),
+                                                  ),
+                                                );
+                                                _loadData();
+                                              } else {
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                  const SnackBar(
+                                                    content: Text(
+                                                        'Error al eliminar el reporte'),
+                                                  ),
+                                                );
+                                              }
+                                            }
                                           },
                                           icon: const Icon(Icons.delete,
                                               color: Colors.red),

@@ -214,6 +214,10 @@ class ReportProvider with ChangeNotifier {
     required String locationText,
     required String reportType,
     required String description,
+    String? status,
+    String? assignedOperatorId,
+    String? estimatedTime,
+    String? notes,
   }) async {
     _isLoading = true;
     notifyListeners();
@@ -229,9 +233,14 @@ class ReportProvider with ChangeNotifier {
         locationText: locationText,
         reportType: reportType,
         description: description,
+        status: status,
+        assignedOperatorId: assignedOperatorId,
+        estimatedTime: estimatedTime,
+        notes: notes,
       );
       await fetchRecentReports();
       await fetchReportCoordinates();
+      await fetchAllReports();
       return true;
     } catch (e) {
       print("Error updating report: $e");
