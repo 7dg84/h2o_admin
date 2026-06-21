@@ -26,11 +26,19 @@ class AjustesAdminPage extends StatefulWidget {
 class _AjustesAdminPageState extends State<AjustesAdminPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  int _activeTab = 0;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
+    _tabController.addListener(() {
+      if (mounted) {
+        setState(() {
+          _activeTab = _tabController.index;
+        });
+      }
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // Pre-load dropdown data globally
       context.read<ServiceProvider>().getAll(page: 1, filters: {'limit': 100});
@@ -46,91 +54,100 @@ class _AjustesAdminPageState extends State<AjustesAdminPage>
     super.dispose();
   }
 
+  Widget _buildActiveTab() {
+    switch (_activeTab) {
+      case 0:
+        return const _DocumentTypesTab();
+      case 1:
+        return const _ServicesTab();
+      case 2:
+        return const _ServiceRequirementsTab();
+      case 3:
+        return const _PaymentsTab();
+      default:
+        return const SizedBox();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(24.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Breadcrumbs and Title
-          Row(
-            children: [
-              const Text(
-                'Configuración',
-                style: TextStyle(color: Colors.grey, fontSize: 14),
-              ),
-              const SizedBox(width: 8),
-              const Text('/', style: TextStyle(color: Colors.grey)),
-              const SizedBox(width: 8),
-              Text(
-                'Ajustes del Sistema',
-                style: TextStyle(
-                  color: Colors.blue[700],
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Breadcrumbs and Title
+            Row(
+              children: [
+                const Text(
+                  'Configuración',
+                  style: TextStyle(color: Colors.grey, fontSize: 14),
                 ),
+                const SizedBox(width: 8),
+                const Text('/', style: TextStyle(color: Colors.grey)),
+                const SizedBox(width: 8),
+                Text(
+                  'Ajustes del Sistema',
+                  style: TextStyle(
+                    color: Colors.blue[700],
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+
+            const Text(
+              'Ajustes y Parametrización',
+              style: TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF1E293B),
               ),
-            ],
-          ),
-          const SizedBox(height: 24),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Administra los tipos de documentos, los servicios ciudadanos disponibles, los requisitos obligatorios y las tarifas de pago del sistema.',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey,
+              ),
+            ),
+            const SizedBox(height: 24),
 
-          const Text(
-            'Ajustes y Parametrización',
-            style: TextStyle(
-              fontSize: 32,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF1E293B),
+            // Custom TabBar with beautiful styling
+            Card(
+              margin: EdgeInsets.zero,
+              elevation: 0,
+              color: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: const BorderSide(color: Color(0xFFE2E8F0)),
+              ),
+              child: TabBar(
+                controller: _tabController,
+                indicatorColor: Colors.blue[700],
+                labelColor: Colors.blue[700],
+                unselectedLabelColor: Colors.grey[600],
+                labelStyle: const TextStyle(fontWeight: FontWeight.bold),
+                tabs: const [
+                  Tab(
+                      icon: Icon(Icons.description),
+                      text: 'Tipos de Documento'),
+                  Tab(icon: Icon(Icons.room_service), text: 'Servicios'),
+                  Tab(icon: Icon(Icons.rule), text: 'Requisitos de Servicio'),
+                  Tab(icon: Icon(Icons.payment), text: 'Pagos'),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            'Administra los tipos de documentos, los servicios ciudadanos disponibles, los requisitos obligatorios y las tarifas de pago del sistema.',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey,
-            ),
-          ),
-          const SizedBox(height: 24),
+            const SizedBox(height: 24),
 
-          // Custom TabBar with beautiful styling
-          Card(
-            margin: EdgeInsets.zero,
-            elevation: 0,
-            color: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-              side: const BorderSide(color: Color(0xFFE2E8F0)),
-            ),
-            child: TabBar(
-              controller: _tabController,
-              indicatorColor: Colors.blue[700],
-              labelColor: Colors.blue[700],
-              unselectedLabelColor: Colors.grey[600],
-              labelStyle: const TextStyle(fontWeight: FontWeight.bold),
-              tabs: const [
-                Tab(icon: Icon(Icons.description), text: 'Tipos de Documento'),
-                Tab(icon: Icon(Icons.room_service), text: 'Servicios'),
-                Tab(icon: Icon(Icons.rule), text: 'Requisitos de Servicio'),
-                Tab(icon: Icon(Icons.payment), text: 'Pagos'),
-              ],
-            ),
-          ),
-          const SizedBox(height: 24),
-
-          // Tab views
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: const [
-                _DocumentTypesTab(),
-                _ServicesTab(),
-                _ServiceRequirementsTab(),
-                _PaymentsTab(),
-              ],
-            ),
-          ),
-        ],
+            // Active Tab View Content
+            _buildActiveTab(),
+          ],
+        ),
       ),
     );
   }
@@ -180,13 +197,15 @@ class _DocumentTypesTabState extends State<_DocumentTypesTab> {
   Future<void> _openFormDialog([DocumentTypeModel? docType]) async {
     final isEdit = docType != null;
     final nameController = TextEditingController(text: docType?.name ?? '');
-    final descController = TextEditingController(text: docType?.description ?? '');
+    final descController =
+        TextEditingController(text: docType?.description ?? '');
     final formKey = GlobalKey<FormState>();
 
     final result = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(isEdit ? 'Editar Tipo de Documento' : 'Nuevo Tipo de Documento'),
+        title: Text(
+            isEdit ? 'Editar Tipo de Documento' : 'Nuevo Tipo de Documento'),
         content: Form(
           key: formKey,
           child: Column(
@@ -208,7 +227,9 @@ class _DocumentTypesTabState extends State<_DocumentTypesTab> {
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Cancelar')),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
             child: const Text('Guardar'),
@@ -230,9 +251,8 @@ class _DocumentTypesTabState extends State<_DocumentTypesTab> {
             .read<DocumentTypeProvider>()
             .updateDocumentType(docType!.id, data);
       } else {
-        success = await context
-            .read<DocumentTypeProvider>()
-            .createDocumentType(data);
+        success =
+            await context.read<DocumentTypeProvider>().createDocumentType(data);
       }
 
       setState(() => _loading = false);
@@ -252,9 +272,12 @@ class _DocumentTypesTabState extends State<_DocumentTypesTab> {
         title: const Text('Eliminar Tipo de Documento'),
         content: Text('¿Está seguro de eliminar "${docType.name}"?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Cancelar')),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
+            style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red, foregroundColor: Colors.white),
             onPressed: () => Navigator.pop(ctx, true),
             child: const Text('Eliminar'),
           ),
@@ -264,7 +287,9 @@ class _DocumentTypesTabState extends State<_DocumentTypesTab> {
 
     if (confirm == true) {
       setState(() => _loading = true);
-      final success = await context.read<DocumentTypeProvider>().deleteDocumentType(docType.id);
+      final success = await context
+          .read<DocumentTypeProvider>()
+          .deleteDocumentType(docType.id);
       setState(() => _loading = false);
 
       if (mounted) {
@@ -274,7 +299,9 @@ class _DocumentTypesTabState extends State<_DocumentTypesTab> {
         if (success) {
           _loadData();
           // Update global list
-          context.read<DocumentTypeProvider>().getAll(page: 1, filters: {'limit': 100});
+          context
+              .read<DocumentTypeProvider>()
+              .getAll(page: 1, filters: {'limit': 100});
         }
       }
     }
@@ -317,38 +344,60 @@ class _DocumentTypesTabState extends State<_DocumentTypesTab> {
         const SizedBox(height: 16),
 
         if (_loading)
-          const Expanded(child: Center(child: CircularProgressIndicator()))
+          const Center(
+            child: Padding(
+              padding: EdgeInsets.all(32.0),
+              child: CircularProgressIndicator(),
+            ),
+          )
         else
-          Expanded(
-            child: ReusableCrudTable<DocumentTypeModel>(
-              headers: const ['ID', 'Nombre', 'Descripción', 'Acciones'],
-              flexes: const [1, 2, 4, 1],
-              items: items,
-              currentPage: _currentPage,
-              totalPages: totalPages,
-              totalCount: totalCount,
-              itemsPerPage: _itemsPerPage,
-              emptyMessage: 'No hay tipos de documentos configurados.',
-              onPageChanged: (p) {
-                setState(() => _currentPage = p);
-                _loadData();
-              },
-              rowBuilder: (context, doc, index) => Row(
-                children: [
-                  Expanded(flex: 1, child: Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: Text(doc.id.substring(0, 8), style: const TextStyle(fontFamily: 'monospace')))),
-                  Expanded(flex: 2, child: Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: Text(doc.name, style: const TextStyle(fontWeight: FontWeight.bold)))),
-                  Expanded(flex: 4, child: Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: Text(doc.description))),
-                  Expanded(
+          ReusableCrudTable<DocumentTypeModel>(
+            headers: const ['ID', 'Nombre', 'Descripción', 'Acciones'],
+            flexes: const [1, 2, 4, 1],
+            items: items,
+            currentPage: _currentPage,
+            totalPages: totalPages,
+            totalCount: totalCount,
+            itemsPerPage: _itemsPerPage,
+            emptyMessage: 'No hay tipos de documentos configurados.',
+            onPageChanged: (p) {
+              setState(() => _currentPage = p);
+              _loadData();
+            },
+            rowBuilder: (context, doc, index) => Row(
+              children: [
+                Expanded(
                     flex: 1,
-                    child: Row(
-                      children: [
-                        IconButton(icon: const Icon(Icons.edit, color: Colors.blue), onPressed: () => _openFormDialog(doc)),
-                        IconButton(icon: const Icon(Icons.delete, color: Colors.red), onPressed: () => _confirmDelete(doc)),
-                      ],
-                    ),
+                    child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(doc.id.substring(0, 8),
+                            style: const TextStyle(fontFamily: 'monospace')))),
+                Expanded(
+                    flex: 2,
+                    child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(doc.name,
+                            style:
+                                const TextStyle(fontWeight: FontWeight.bold)))),
+                Expanded(
+                    flex: 4,
+                    child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(doc.description))),
+                Expanded(
+                  flex: 1,
+                  child: Row(
+                    children: [
+                      IconButton(
+                          icon: const Icon(Icons.edit, color: Colors.blue),
+                          onPressed: () => _openFormDialog(doc)),
+                      IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                          onPressed: () => _confirmDelete(doc)),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
       ],
@@ -400,8 +449,10 @@ class _ServicesTabState extends State<_ServicesTab> {
   }
 
   Future<void> _openFiltersDialog() async {
-    final nameController = TextEditingController(text: _filters['name__icontains'] ?? '');
-    final descController = TextEditingController(text: _filters['description__icontains'] ?? '');
+    final nameController =
+        TextEditingController(text: _filters['name__icontains'] ?? '');
+    final descController =
+        TextEditingController(text: _filters['description__icontains'] ?? '');
 
     final result = await showDialog<Map<String, dynamic>>(
       context: context,
@@ -417,7 +468,8 @@ class _ServicesTabState extends State<_ServicesTab> {
             const SizedBox(height: 12),
             TextField(
               controller: descController,
-              decoration: const InputDecoration(labelText: 'Descripción contiene'),
+              decoration:
+                  const InputDecoration(labelText: 'Descripción contiene'),
             ),
           ],
         ),
@@ -429,12 +481,16 @@ class _ServicesTabState extends State<_ServicesTab> {
             },
             child: const Text('Limpiar'),
           ),
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar')),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancelar')),
           ElevatedButton(
             onPressed: () {
               Map<String, dynamic> out = {};
-              if (nameController.text.isNotEmpty) out['name__icontains'] = nameController.text;
-              if (descController.text.isNotEmpty) out['description__icontains'] = descController.text;
+              if (nameController.text.isNotEmpty)
+                out['name__icontains'] = nameController.text;
+              if (descController.text.isNotEmpty)
+                out['description__icontains'] = descController.text;
               Navigator.pop(ctx, out);
             },
             child: const Text('Aplicar'),
@@ -455,8 +511,10 @@ class _ServicesTabState extends State<_ServicesTab> {
   Future<void> _openFormDialog([ServiceModel? service]) async {
     final isEdit = service != null;
     final nameController = TextEditingController(text: service?.name ?? '');
-    final descController = TextEditingController(text: service?.description ?? '');
-    final timeController = TextEditingController(text: service?.responseTime ?? '');
+    final descController =
+        TextEditingController(text: service?.description ?? '');
+    final timeController =
+        TextEditingController(text: service?.responseTime ?? '');
     final formKey = GlobalKey<FormState>();
 
     final result = await showDialog<bool>(
@@ -483,14 +541,17 @@ class _ServicesTabState extends State<_ServicesTab> {
               const SizedBox(height: 12),
               TextFormField(
                 controller: timeController,
-                decoration: const InputDecoration(labelText: 'Tiempo de Respuesta (Ej. 72h)'),
+                decoration: const InputDecoration(
+                    labelText: 'Tiempo de Respuesta (Ej. 72h)'),
                 validator: (v) => v == null || v.isEmpty ? 'Requerido' : null,
               ),
             ],
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Cancelar')),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
             child: const Text('Guardar'),
@@ -513,9 +574,7 @@ class _ServicesTabState extends State<_ServicesTab> {
             .read<ServiceProvider>()
             .updateService(service!.id, data);
       } else {
-        success = await context
-            .read<ServiceProvider>()
-            .createService(data);
+        success = await context.read<ServiceProvider>().createService(data);
       }
 
       setState(() => _loading = false);
@@ -535,9 +594,12 @@ class _ServicesTabState extends State<_ServicesTab> {
         title: const Text('Eliminar Servicio'),
         content: Text('¿Está seguro de eliminar "${service.name}"?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Cancelar')),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
+            style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red, foregroundColor: Colors.white),
             onPressed: () => Navigator.pop(ctx, true),
             child: const Text('Eliminar'),
           ),
@@ -547,7 +609,8 @@ class _ServicesTabState extends State<_ServicesTab> {
 
     if (confirm == true) {
       setState(() => _loading = true);
-      final success = await context.read<ServiceProvider>().deleteService(service.id);
+      final success =
+          await context.read<ServiceProvider>().deleteService(service.id);
       setState(() => _loading = false);
 
       if (mounted) {
@@ -557,7 +620,9 @@ class _ServicesTabState extends State<_ServicesTab> {
         if (success) {
           _loadData();
           // Update global list
-          context.read<ServiceProvider>().getAll(page: 1, filters: {'limit': 100});
+          context
+              .read<ServiceProvider>()
+              .getAll(page: 1, filters: {'limit': 100});
         }
       }
     }
@@ -607,58 +672,99 @@ class _ServicesTabState extends State<_ServicesTab> {
         const SizedBox(height: 16),
 
         if (_loading)
-          const Expanded(child: Center(child: CircularProgressIndicator()))
+          const Center(
+            child: Padding(
+              padding: EdgeInsets.all(32.0),
+              child: CircularProgressIndicator(),
+            ),
+          )
         else
-          Expanded(
-            child: ReusableCrudTable<ServiceModel>(
-              headers: const ['ID', 'Nombre', 'Descripción', 'Tiempo Resp.', 'Requisitos', 'Acciones'],
-              flexes: const [1, 2, 3, 1, 2, 1],
-              items: items,
-              currentPage: _currentPage,
-              totalPages: totalPages,
-              totalCount: totalCount,
-              itemsPerPage: _itemsPerPage,
-              emptyMessage: 'No hay servicios configurados.',
-              onPageChanged: (p) {
-                setState(() => _currentPage = p);
-                _loadData();
-              },
-              rowBuilder: (context, s, index) => Row(
-                children: [
-                  Expanded(flex: 1, child: Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: Text(s.id.substring(0, 8), style: const TextStyle(fontFamily: 'monospace')))),
-                  Expanded(flex: 2, child: Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: Text(s.name, style: const TextStyle(fontWeight: FontWeight.bold)))),
-                  Expanded(flex: 3, child: Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: Text(s.description))),
-                  Expanded(flex: 1, child: Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: Text(s.responseTime))),
-                  Expanded(
+          ReusableCrudTable<ServiceModel>(
+            headers: const [
+              'ID',
+              'Nombre',
+              'Descripción',
+              'Tiempo Resp.',
+              'Requisitos',
+              'Acciones'
+            ],
+            flexes: const [1, 2, 3, 1, 2, 1],
+            items: items,
+            currentPage: _currentPage,
+            totalPages: totalPages,
+            totalCount: totalCount,
+            itemsPerPage: _itemsPerPage,
+            emptyMessage: 'No hay servicios configurados.',
+            onPageChanged: (p) {
+              setState(() => _currentPage = p);
+              _loadData();
+            },
+            rowBuilder: (context, s, index) => Row(
+              children: [
+                Expanded(
+                    flex: 1,
+                    child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(s.id.substring(0, 8),
+                            style: const TextStyle(fontFamily: 'monospace')))),
+                Expanded(
                     flex: 2,
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Wrap(
-                        spacing: 4,
-                        children: s.requirements.isEmpty
-                            ? [const Text('Sin requisitos', style: TextStyle(fontSize: 12, color: Colors.grey))]
-                            : s.requirements
-                                .map((req) => Chip(
-                                      label: Text(req.documentTypeName, style: const TextStyle(fontSize: 10)),
-                                      backgroundColor: req.required ? Colors.red[50] : Colors.grey[100],
-                                      padding: EdgeInsets.zero,
-                                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                    ))
-                                .toList(),
-                      ),
-                    ),
-                  ),
-                  Expanded(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(s.name,
+                            style:
+                                const TextStyle(fontWeight: FontWeight.bold)))),
+                Expanded(
+                    flex: 3,
+                    child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(s.description))),
+                Expanded(
                     flex: 1,
-                    child: Row(
-                      children: [
-                        IconButton(icon: const Icon(Icons.edit, color: Colors.blue), onPressed: () => _openFormDialog(s)),
-                        IconButton(icon: const Icon(Icons.delete, color: Colors.red), onPressed: () => _confirmDelete(s)),
-                      ],
+                    child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(s.responseTime))),
+                Expanded(
+                  flex: 2,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Wrap(
+                      spacing: 4,
+                      children: s.requirements.isEmpty
+                          ? [
+                              const Text('Sin requisitos',
+                                  style: TextStyle(
+                                      fontSize: 12, color: Colors.grey))
+                            ]
+                          : s.requirements
+                              .map((req) => Chip(
+                                    label: Text(req.documentTypeName,
+                                        style: const TextStyle(fontSize: 10)),
+                                    backgroundColor: req.required
+                                        ? Colors.red[50]
+                                        : Colors.grey[100],
+                                    padding: EdgeInsets.zero,
+                                    materialTapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
+                                  ))
+                              .toList(),
                     ),
                   ),
-                ],
-              ),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: Row(
+                    children: [
+                      IconButton(
+                          icon: const Icon(Icons.edit, color: Colors.blue),
+                          onPressed: () => _openFormDialog(s)),
+                      IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                          onPressed: () => _confirmDelete(s)),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
       ],
@@ -673,7 +779,8 @@ class _ServiceRequirementsTab extends StatefulWidget {
   const _ServiceRequirementsTab();
 
   @override
-  State<_ServiceRequirementsTab> createState() => _ServiceRequirementsTabState();
+  State<_ServiceRequirementsTab> createState() =>
+      _ServiceRequirementsTabState();
 }
 
 class _ServiceRequirementsTabState extends State<_ServiceRequirementsTab> {
@@ -722,7 +829,8 @@ class _ServiceRequirementsTabState extends State<_ServiceRequirementsTab> {
 
   String _getDocTypeName(String id, List<DocumentTypeModel> docs) {
     final d = docs.firstWhere((x) => x.id == id,
-        orElse: () => DocumentTypeModel(id: '', name: 'Cargando...', description: ''));
+        orElse: () =>
+            DocumentTypeModel(id: '', name: 'Cargando...', description: ''));
     return d.name.isNotEmpty ? d.name : id;
   }
 
@@ -750,25 +858,30 @@ class _ServiceRequirementsTabState extends State<_ServiceRequirementsTab> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Servicio', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+              const Text('Servicio',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
               DropdownButtonFormField<String>(
                 value: selService,
                 items: services
-                    .map((s) => DropdownMenuItem(value: s.id, child: Text(s.name)))
+                    .map((s) =>
+                        DropdownMenuItem(value: s.id, child: Text(s.name)))
                     .toList(),
                 onChanged: (v) => setDialogState(() => selService = v),
               ),
               const SizedBox(height: 12),
-              const Text('Tipo de Documento', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+              const Text('Tipo de Documento',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
               DropdownButtonFormField<String>(
                 value: selDocType,
                 items: docTypes
-                    .map((d) => DropdownMenuItem(value: d.id, child: Text(d.name)))
+                    .map((d) =>
+                        DropdownMenuItem(value: d.id, child: Text(d.name)))
                     .toList(),
                 onChanged: (v) => setDialogState(() => selDocType = v),
               ),
               const SizedBox(height: 12),
-              const Text('Obligatorio', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+              const Text('Obligatorio',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
               DropdownButtonFormField<bool>(
                 value: selRequired,
                 items: const [
@@ -790,7 +903,9 @@ class _ServiceRequirementsTabState extends State<_ServiceRequirementsTab> {
               },
               child: const Text('Limpiar'),
             ),
-            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar')),
+            TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('Cancelar')),
             ElevatedButton(
               onPressed: () {
                 Map<String, dynamic> out = {};
@@ -838,23 +953,33 @@ class _ServiceRequirementsTabState extends State<_ServiceRequirementsTab> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Servicio', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                  const Text('Servicio',
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
                   DropdownButtonFormField<String>(
                     value: selService,
                     items: services
-                        .map((s) => DropdownMenuItem(value: s.id, child: Text(s.name)))
+                        .map((s) =>
+                            DropdownMenuItem(value: s.id, child: Text(s.name)))
                         .toList(),
-                    onChanged: isEdit ? null : (v) => setDialogState(() => selService = v),
+                    onChanged: isEdit
+                        ? null
+                        : (v) => setDialogState(() => selService = v),
                     validator: (v) => v == null ? 'Requerido' : null,
                   ),
                   const SizedBox(height: 12),
-                  const Text('Tipo de Documento', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                  const Text('Tipo de Documento',
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
                   DropdownButtonFormField<String>(
                     value: selDocType,
                     items: docTypes
-                        .map((d) => DropdownMenuItem(value: d.id, child: Text(d.name)))
+                        .map((d) =>
+                            DropdownMenuItem(value: d.id, child: Text(d.name)))
                         .toList(),
-                    onChanged: isEdit ? null : (v) => setDialogState(() => selDocType = v),
+                    onChanged: isEdit
+                        ? null
+                        : (v) => setDialogState(() => selDocType = v),
                     validator: (v) => v == null ? 'Requerido' : null,
                   ),
                   const SizedBox(height: 12),
@@ -867,7 +992,8 @@ class _ServiceRequirementsTabState extends State<_ServiceRequirementsTab> {
                   const SizedBox(height: 12),
                   TextFormField(
                     controller: notesController,
-                    decoration: const InputDecoration(labelText: 'Notas / Instrucciones'),
+                    decoration: const InputDecoration(
+                        labelText: 'Notas / Instrucciones'),
                     maxLines: 2,
                   ),
                 ],
@@ -875,7 +1001,9 @@ class _ServiceRequirementsTabState extends State<_ServiceRequirementsTab> {
             ),
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
+            TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text('Cancelar')),
             ElevatedButton(
               onPressed: () => Navigator.pop(ctx, true),
               child: const Text('Guardar'),
@@ -913,7 +1041,9 @@ class _ServiceRequirementsTabState extends State<_ServiceRequirementsTab> {
         if (success) {
           _loadData();
           // Reload Service list to sync display requirements
-          context.read<ServiceProvider>().getAll(page: 1, filters: {'limit': 100});
+          context
+              .read<ServiceProvider>()
+              .getAll(page: 1, filters: {'limit': 100});
         }
       }
     }
@@ -929,11 +1059,15 @@ class _ServiceRequirementsTabState extends State<_ServiceRequirementsTab> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Eliminar Requisito'),
-        content: Text('¿Desea eliminar el requisito "$docName" para el servicio "$serviceName"?'),
+        content: Text(
+            '¿Desea eliminar el requisito "$docName" para el servicio "$serviceName"?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Cancelar')),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
+            style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red, foregroundColor: Colors.white),
             onPressed: () => Navigator.pop(ctx, true),
             child: const Text('Eliminar'),
           ),
@@ -943,7 +1077,9 @@ class _ServiceRequirementsTabState extends State<_ServiceRequirementsTab> {
 
     if (confirm == true) {
       setState(() => _loading = true);
-      final success = await context.read<ServiceRequirementProvider>().deleteRequirement(req.id);
+      final success = await context
+          .read<ServiceRequirementProvider>()
+          .deleteRequirement(req.id);
       setState(() => _loading = false);
 
       if (mounted) {
@@ -952,7 +1088,9 @@ class _ServiceRequirementsTabState extends State<_ServiceRequirementsTab> {
         ));
         if (success) {
           _loadData();
-          context.read<ServiceProvider>().getAll(page: 1, filters: {'limit': 100});
+          context
+              .read<ServiceProvider>()
+              .getAll(page: 1, filters: {'limit': 100});
         }
       }
     }
@@ -1005,57 +1143,102 @@ class _ServiceRequirementsTabState extends State<_ServiceRequirementsTab> {
         const SizedBox(height: 16),
 
         if (_loading)
-          const Expanded(child: Center(child: CircularProgressIndicator()))
+          const Center(
+            child: Padding(
+              padding: EdgeInsets.all(32.0),
+              child: CircularProgressIndicator(),
+            ),
+          )
         else
-          Expanded(
-            child: ReusableCrudTable<ServiceRequirementModel>(
-              headers: const ['ID', 'Servicio', 'Tipo de Documento', 'Obligatorio', 'Notas', 'Acciones'],
-              flexes: const [1, 3, 3, 1, 3, 1],
-              items: items,
-              currentPage: _currentPage,
-              totalPages: totalPages,
-              totalCount: totalCount,
-              itemsPerPage: _itemsPerPage,
-              emptyMessage: 'No hay requisitos de servicio configurados.',
-              onPageChanged: (p) {
-                setState(() => _currentPage = p);
-                _loadData();
-              },
-              rowBuilder: (context, req, index) => Row(
-                children: [
-                  Expanded(flex: 1, child: Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: Text(req.id.toString(), style: const TextStyle(fontFamily: 'monospace')))),
-                  Expanded(flex: 3, child: Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: Text(_getServiceName(req.service, services), style: const TextStyle(fontWeight: FontWeight.w500)))),
-                  Expanded(flex: 3, child: Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: Text(_getDocTypeName(req.documentType, docTypes)))),
-                  Expanded(
+          ReusableCrudTable<ServiceRequirementModel>(
+            headers: const [
+              'ID',
+              'Servicio',
+              'Tipo de Documento',
+              'Obligatorio',
+              'Notas',
+              'Acciones'
+            ],
+            flexes: const [1, 3, 3, 1, 3, 1],
+            items: items,
+            currentPage: _currentPage,
+            totalPages: totalPages,
+            totalCount: totalCount,
+            itemsPerPage: _itemsPerPage,
+            emptyMessage: 'No hay requisitos de servicio configurados.',
+            onPageChanged: (p) {
+              setState(() => _currentPage = p);
+              _loadData();
+            },
+            rowBuilder: (context, req, index) => Row(
+              children: [
+                Expanded(
                     flex: 1,
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: req.required ? Colors.red[50] : Colors.green[50],
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          req.required ? 'Obligatorio' : 'Opcional',
-                          style: TextStyle(color: req.required ? Colors.red[700] : Colors.green[700], fontSize: 10, fontWeight: FontWeight.bold),
-                          textAlign: TextAlign.center,
-                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(req.id.toString(),
+                            style: const TextStyle(fontFamily: 'monospace')))),
+                Expanded(
+                    flex: 3,
+                    child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(_getServiceName(req.service, services),
+                            style:
+                                const TextStyle(fontWeight: FontWeight.w500)))),
+                Expanded(
+                    flex: 3,
+                    child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child:
+                            Text(_getDocTypeName(req.documentType, docTypes)))),
+                Expanded(
+                  flex: 1,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: req.required ? Colors.red[50] : Colors.green[50],
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        req.required ? 'Obligatorio' : 'Opcional',
+                        style: TextStyle(
+                            color: req.required
+                                ? Colors.red[700]
+                                : Colors.green[700],
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.center,
                       ),
                     ),
                   ),
-                  Expanded(flex: 3, child: Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: Text(req.notes ?? 'Sin notas', style: TextStyle(color: req.notes == null ? Colors.grey : Colors.black, fontSize: 13)))),
-                  Expanded(
-                    flex: 1,
-                    child: Row(
-                      children: [
-                        IconButton(icon: const Icon(Icons.edit, color: Colors.blue), onPressed: () => _openFormDialog(req)),
-                        IconButton(icon: const Icon(Icons.delete, color: Colors.red), onPressed: () => _confirmDelete(req)),
-                      ],
-                    ),
+                ),
+                Expanded(
+                    flex: 3,
+                    child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(req.notes ?? 'Sin notas',
+                            style: TextStyle(
+                                color: req.notes == null
+                                    ? Colors.grey
+                                    : Colors.black,
+                                fontSize: 13)))),
+                Expanded(
+                  flex: 1,
+                  child: Row(
+                    children: [
+                      IconButton(
+                          icon: const Icon(Icons.edit, color: Colors.blue),
+                          onPressed: () => _openFormDialog(req)),
+                      IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                          onPressed: () => _confirmDelete(req)),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
       ],
@@ -1110,27 +1293,35 @@ class _PaymentsTabState extends State<_PaymentsTab> {
 
     String? selService = payment?.service;
     bool requiresPayment = payment?.requiresPayment ?? true;
-    final amountController = TextEditingController(text: payment?.amount ?? '0.00');
+    final amountController =
+        TextEditingController(text: payment?.amount ?? '0.00');
     final formKey = GlobalKey<FormState>();
 
     final result = await showDialog<bool>(
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
-          title: Text(isEdit ? 'Editar Configuración de Pago' : 'Nueva Configuración de Pago'),
+          title: Text(isEdit
+              ? 'Editar Configuración de Pago'
+              : 'Nueva Configuración de Pago'),
           content: Form(
             key: formKey,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Servicio', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                const Text('Servicio',
+                    style:
+                        TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
                 DropdownButtonFormField<String>(
                   value: selService,
                   items: services
-                      .map((s) => DropdownMenuItem(value: s.id, child: Text(s.name)))
+                      .map((s) =>
+                          DropdownMenuItem(value: s.id, child: Text(s.name)))
                       .toList(),
-                  onChanged: isEdit ? null : (v) => setDialogState(() => selService = v),
+                  onChanged: isEdit
+                      ? null
+                      : (v) => setDialogState(() => selService = v),
                   validator: (v) => v == null ? 'Requerido' : null,
                 ),
                 const SizedBox(height: 12),
@@ -1144,7 +1335,8 @@ class _PaymentsTabState extends State<_PaymentsTab> {
                 TextFormField(
                   controller: amountController,
                   decoration: const InputDecoration(labelText: 'Monto (\$)'),
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
                   validator: (v) {
                     if (v == null || v.isEmpty) return 'Requerido';
                     if (double.tryParse(v) == null) return 'Monto inválido';
@@ -1155,7 +1347,9 @@ class _PaymentsTabState extends State<_PaymentsTab> {
             ),
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
+            TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text('Cancelar')),
             ElevatedButton(
               onPressed: () => Navigator.pop(ctx, true),
               child: const Text('Guardar'),
@@ -1179,9 +1373,7 @@ class _PaymentsTabState extends State<_PaymentsTab> {
             .read<PaymentProvider>()
             .updatePayment(payment!.id, data);
       } else {
-        success = await context
-            .read<PaymentProvider>()
-            .createPayment(data);
+        success = await context.read<PaymentProvider>().createPayment(data);
       }
 
       setState(() => _loading = false);
@@ -1199,11 +1391,15 @@ class _PaymentsTabState extends State<_PaymentsTab> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Eliminar Configuración de Pago'),
-        content: Text('¿Desea eliminar la configuración de pago para "${payment.serviceName ?? payment.service}"?'),
+        content: Text(
+            '¿Desea eliminar la configuración de pago para "${payment.serviceName ?? payment.service}"?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Cancelar')),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
+            style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red, foregroundColor: Colors.white),
             onPressed: () => Navigator.pop(ctx, true),
             child: const Text('Eliminar'),
           ),
@@ -1213,7 +1409,8 @@ class _PaymentsTabState extends State<_PaymentsTab> {
 
     if (confirm == true) {
       setState(() => _loading = true);
-      final success = await context.read<PaymentProvider>().deletePayment(payment.id);
+      final success =
+          await context.read<PaymentProvider>().deletePayment(payment.id);
       setState(() => _loading = false);
 
       if (mounted) {
@@ -1264,67 +1461,112 @@ class _PaymentsTabState extends State<_PaymentsTab> {
         const SizedBox(height: 16),
 
         if (_loading)
-          const Expanded(child: Center(child: CircularProgressIndicator()))
+          const Center(
+            child: Padding(
+              padding: EdgeInsets.all(32.0),
+              child: CircularProgressIndicator(),
+            ),
+          )
         else
-          Expanded(
-            child: ReusableCrudTable<PaymentModel>(
-              headers: const ['ID', 'Servicio', 'Requiere Pago', 'Monto', 'Acciones'],
-              flexes: const [1, 4, 2, 2, 1],
-              items: items,
-              currentPage: _currentPage,
-              totalPages: totalPages,
-              totalCount: totalCount,
-              itemsPerPage: _itemsPerPage,
-              emptyMessage: 'No hay configuraciones de pago registradas.',
-              onPageChanged: (p) {
-                setState(() => _currentPage = p);
-                _loadData();
-              },
-              rowBuilder: (context, p, index) {
-                // Find service name locally if null in API
-                String name = p.serviceName ?? '';
-                if (name.isEmpty) {
-                  final s = services.firstWhere((x) => x.id == p.service,
-                      orElse: () => ServiceModel(id: '', name: '', description: '', responseTime: '', requirements: []));
-                  name = s.name.isNotEmpty ? s.name : p.service;
-                }
+          ReusableCrudTable<PaymentModel>(
+            headers: const [
+              'ID',
+              'Servicio',
+              'Requiere Pago',
+              'Monto',
+              'Acciones'
+            ],
+            flexes: const [1, 4, 2, 2, 1],
+            items: items,
+            currentPage: _currentPage,
+            totalPages: totalPages,
+            totalCount: totalCount,
+            itemsPerPage: _itemsPerPage,
+            emptyMessage: 'No hay configuraciones de pago registradas.',
+            onPageChanged: (p) {
+              setState(() => _currentPage = p);
+              _loadData();
+            },
+            rowBuilder: (context, p, index) {
+              // Find service name locally if null in API
+              String name = p.serviceName ?? '';
+              if (name.isEmpty) {
+                final s = services.firstWhere((x) => x.id == p.service,
+                    orElse: () => ServiceModel(
+                        id: '',
+                        name: '',
+                        description: '',
+                        responseTime: '',
+                        requirements: []));
+                name = s.name.isNotEmpty ? s.name : p.service;
+              }
 
-                return Row(
-                  children: [
-                    Expanded(flex: 1, child: Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: Text(p.id.substring(0, 8), style: const TextStyle(fontFamily: 'monospace')))),
-                    Expanded(flex: 4, child: Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: Text(name, style: const TextStyle(fontWeight: FontWeight.bold)))),
-                    Expanded(
-                      flex: 2,
+              return Row(
+                children: [
+                  Expanded(
+                      flex: 1,
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: p.requiresPayment ? Colors.orange[50] : Colors.grey[100],
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            p.requiresPayment ? 'Requiere Pago' : 'Gratuito',
-                            style: TextStyle(color: p.requiresPayment ? Colors.orange[700] : Colors.grey[700], fontSize: 10, fontWeight: FontWeight.bold),
-                            textAlign: TextAlign.center,
-                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Text(p.id.substring(0, 8),
+                              style:
+                                  const TextStyle(fontFamily: 'monospace')))),
+                  Expanded(
+                      flex: 4,
+                      child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Text(name,
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold)))),
+                  Expanded(
+                    flex: 2,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: p.requiresPayment
+                              ? Colors.orange[50]
+                              : Colors.grey[100],
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          p.requiresPayment ? 'Requiere Pago' : 'Gratuito',
+                          style: TextStyle(
+                              color: p.requiresPayment
+                                  ? Colors.orange[700]
+                                  : Colors.grey[700],
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold),
+                          textAlign: TextAlign.center,
                         ),
                       ),
                     ),
-                    Expanded(flex: 2, child: Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: Text('\$${p.amount}', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green)))),
-                    Expanded(
-                      flex: 1,
-                      child: Row(
-                        children: [
-                          IconButton(icon: const Icon(Icons.edit, color: Colors.blue), onPressed: () => _openFormDialog(p)),
-                          IconButton(icon: const Icon(Icons.delete, color: Colors.red), onPressed: () => _confirmDelete(p)),
-                        ],
-                      ),
+                  ),
+                  Expanded(
+                      flex: 2,
+                      child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Text('\$${p.amount}',
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.green)))),
+                  Expanded(
+                    flex: 1,
+                    child: Row(
+                      children: [
+                        IconButton(
+                            icon: const Icon(Icons.edit, color: Colors.blue),
+                            onPressed: () => _openFormDialog(p)),
+                        IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            onPressed: () => _confirmDelete(p)),
+                      ],
                     ),
-                  ],
-                );
-              },
-            ),
+                  ),
+                ],
+              );
+            },
           ),
       ],
     );
