@@ -76,8 +76,6 @@ class _TramiteDetailScreenState extends State<TramiteDetailScreen> {
         'status': _selectedStatus,
         'notes':
             _notesController.text.isNotEmpty ? _notesController.text : null,
-        'service': _tramite!.service,
-        'user': _tramite!.user,
       };
 
       final success = await context

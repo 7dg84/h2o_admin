@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:file_picker/file_picker.dart';
 import '../models/report_model.dart';
 import '../models/media_model.dart';
 import '../services/report_service.dart';
@@ -306,8 +307,84 @@ class ReportProvider with ChangeNotifier {
     }
   }
 
-  void toCSV() {
-    
+  Future<bool> toCSV() async {
+    try {
+      if (_allReports.isEmpty) {
+        throw Exception('No hay reportes para exportar');
+      }
+
+      final headers = [
+        'ID',
+        'Folio',
+        'Usuario',
+        'Fecha de Reporte',
+        'Latitud',
+        'Longitud',
+        'Ubicación',
+        'Tipo de Reporte',
+        'Descripción',
+        'Estado',
+        'Operador Asignado',
+        'Tiempo Estimado',
+        'Notas'
+      ];
+
+      final rows = <String>[];
+      rows.add(headers.map((h) => '"${h.replaceAll('"', '""')}"').join(','));
+
+      for (var report in _allReports) {
+        rows.add(_toCsvRow([
+          report.id,
+          report.folio,
+          report.user,
+          report.reportedAt.toIso8601String(),
+          report.latitude,
+          report.longitude,
+          report.locationText,
+          report.reportType,
+          report.description,
+          report.statusText,
+          report.assignedOperatorId ?? '',
+          report.estimatedTime ?? '',
+          report.notes ?? '',
+        ]));
+      }
+
+      final csvContent = rows.join('\n');
+
+      String? outputFile = await FilePicker.platform.saveFile(
+        dialogTitle: 'Guardar Reportes en CSV',
+        fileName: 'reportes.csv',
+        type: FileType.custom,
+        allowedExtensions: ['csv'],
+      );
+
+      if (outputFile == null) {
+        return false;
+      }
+
+      if (!outputFile.toLowerCase().endsWith('.csv')) {
+        outputFile = '$outputFile.csv';
+      }
+
+      final file = File(outputFile);
+      await file.writeAsString(csvContent);
+      return true;
+    } catch (e) {
+      print("Error exporting to CSV: $e");
+      rethrow;
+    }
+  }
+
+  String _toCsvRow(List<dynamic> cells) {
+    return cells.map((value) {
+      if (value == null) return '';
+      String str = value.toString();
+      if (str.contains(',') || str.contains('"') || str.contains('\n') || str.contains('\r')) {
+        return '"${str.replaceAll('"', '""')}"';
+      }
+      return str;
+    }).join(',');
   }
 
   

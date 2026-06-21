@@ -140,12 +140,10 @@ class _TramitesAdminPageState extends State<TramitesAdminPage> {
         tramites.where((t) => t.status.toLowerCase() == 'creado').length;
     int inProgressCount = tramites
         .where((t) =>
-            t.status.toLowerCase() == 'en proceso' ||
-            t.status.toLowerCase() == 'en revisión')
+            t.status.toLowerCase() == 'en tramite')
         .length;
     int approvedCount = tramites
         .where((t) =>
-            t.status.toLowerCase() == 'aprobado' ||
             t.status.toLowerCase() == 'completado')
         .length;
 

@@ -245,9 +245,40 @@ class _ReportsAdminPageState extends State<ReportsAdminPage> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    onPressed: () {
-                      // TODO: Implementar exportación de datos
-                    },
+                    onPressed: reports.isEmpty
+                        ? null
+                        : () async {
+                            try {
+                              final success = await context
+                                  .read<ReportProvider>()
+                                  .toCSV();
+                              if (!mounted) return;
+                              if (success) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                        'Reportes exportados con éxito.'),
+                                    backgroundColor: Colors.green,
+                                  ),
+                                );
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Exportación cancelada.'),
+                                    backgroundColor: Colors.orange,
+                                  ),
+                                );
+                              }
+                            } catch (e) {
+                              if (!mounted) return;
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Error al exportar: $e'),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                            }
+                          },
                   ),
                 )
               ],
