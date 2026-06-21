@@ -68,7 +68,7 @@ class AdminLayout extends StatelessWidget {
         child: Row(
           children: [
             SizedBox(
-              width: 240,
+              width: 140,
               child: RightSideMenu(
                   sections: sections,
                   selectedIndex: selectedIndex,

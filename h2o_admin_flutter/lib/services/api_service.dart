@@ -21,10 +21,10 @@ class ApiService {
     _dio.interceptors.add(CookieManager(_cookieJar));
 
     // Logger para depuración (opcional, quitar en producción)
-    _dio.interceptors.add(LogInterceptor(
-      requestBody: true,
-      responseBody: true,
-    ));
+    // _dio.interceptors.add(LogInterceptor(
+    //   requestBody: true,
+    //   responseBody: true,
+    // ));
   }
 
   Dio get dio => _dio;
