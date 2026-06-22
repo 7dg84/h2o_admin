@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:h2o_admin_flutter/services/user_service.dart';
 import '../models/user_model.dart';
 
@@ -128,5 +130,81 @@ class UserProvider with ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     }
+  }
+
+  Future<bool> toCSV() async {
+    try {
+      if (_users.isEmpty) {
+        throw Exception('No hay usuarios para exportar');
+      }
+
+      final headers = [
+        'ID',
+        'Email',
+        'Nombre Completo',
+        'CURP',
+        'Teléfono',
+        'Código Postal',
+        'Colonia',
+        'Calle',
+        'Manzana',
+        'Nº Ext',
+        'Rol'
+      ];
+
+      final rows = <String>[];
+      rows.add(headers.map((h) => '"${h.replaceAll('"', '""')}"').join(','));
+
+      for (var user in _users) {
+        rows.add(_toCsvRow([
+          user.id,
+          user.email,
+          user.name ?? '',
+          user.curp ?? '',
+          user.phone ?? '',
+          user.postalCode ?? '',
+          user.colonia ?? '',
+          user.street ?? '',
+          user.block ?? '',
+          user.exteriorNumber ?? '',
+          user.role.toString().split('.').last,
+        ]));
+      }
+
+      final csvContent = rows.join('\n');
+
+      String? outputFile = await FilePicker.platform.saveFile(
+        dialogTitle: 'Guardar Usuarios en CSV',
+        fileName: 'usuarios.csv',
+        type: FileType.custom,
+        allowedExtensions: ['csv'],
+      );
+
+      if (outputFile == null) {
+        return false;
+      }
+
+      if (!outputFile.toLowerCase().endsWith('.csv')) {
+        outputFile = '$outputFile.csv';
+      }
+
+      final file = File(outputFile);
+      await file.writeAsString(csvContent);
+      return true;
+    } catch (e) {
+      print("Error exporting users to CSV: $e");
+      rethrow;
+    }
+  }
+
+  String _toCsvRow(List<dynamic> cells) {
+    return cells.map((value) {
+      if (value == null) return '';
+      String str = value.toString();
+      if (str.contains(',') || str.contains('"') || str.contains('\n') || str.contains('\r')) {
+        return '"${str.replaceAll('"', '""')}"';
+      }
+      return str;
+    }).join(',');
   }
 }
