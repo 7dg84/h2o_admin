@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:h2o_admin_flutter/core/config.dart';
 import 'package:provider/provider.dart';
+import 'package:dio/dio.dart';
+import 'package:file_picker/file_picker.dart';
 import '../models/tramite_model.dart';
 import '../providers/tramite_provider.dart';
 import '../providers/document_provider.dart';
@@ -154,6 +157,58 @@ class _TramiteDetailScreenState extends State<TramiteDetailScreen> {
     }
   }
 
+  Future<void> _downloadDocument(TramiteDocumentShort doc) async {
+    setState(() => _fetchingDocId = doc.id);
+    try {
+      final detail = await context.read<DocumentProvider>().getDetail(doc.id);
+      if (detail == null || detail.presignedUrl == null) {
+        throw Exception('No se pudo obtener el enlace de descarga');
+      }
+
+      String? outputFile = await FilePicker.platform.saveFile(
+        dialogTitle: 'Descargar Documento',
+        fileName: doc.filename,
+      );
+
+      if (outputFile == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Descarga cancelada.'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+        return;
+      }
+
+      final dio = Dio();
+      await dio.download(detail.presignedUrl!, outputFile);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Documento descargado con éxito en: $outputFile'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al descargar documento: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _fetchingDocId = null);
+      }
+    }
+  }
+
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
       case 'creado':
@@ -193,7 +248,7 @@ class _TramiteDetailScreenState extends State<TramiteDetailScreen> {
         '${_tramite!.createdAt.day}/${_tramite!.createdAt.month}/${_tramite!.createdAt.year} ${_tramite!.createdAt.hour}:${_tramite!.createdAt.minute}';
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: AppConfig.backgroundGray,
       appBar: AppBar(
         title: Text('Trámite Folio #${_tramite!.folio}'),
         backgroundColor: Colors.white,
@@ -231,10 +286,10 @@ class _TramiteDetailScreenState extends State<TramiteDetailScreen> {
                     // Service and General Info Card
                     Card(
                       elevation: 0,
-                      color: Colors.white,
+                      color: AppConfig.backgroundWhite,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
-                        side: BorderSide(color: Colors.grey[200]!),
+                        side: BorderSide(color: AppConfig.cardBorder),
                       ),
                       child: Padding(
                         padding: const EdgeInsets.all(24.0),
@@ -246,7 +301,7 @@ class _TramiteDetailScreenState extends State<TramiteDetailScreen> {
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
-                                color: Color(0xFF1E293B),
+                                color: AppConfig.titleColor,
                               ),
                             ),
                             const Divider(height: 32),
@@ -278,10 +333,10 @@ class _TramiteDetailScreenState extends State<TramiteDetailScreen> {
                     // Status and Notes (Form fields in edit mode, text in read mode)
                     Card(
                       elevation: 0,
-                      color: Colors.white,
+                      color: AppConfig.backgroundWhite,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
-                        side: BorderSide(color: Colors.grey[200]!),
+                        side: BorderSide(color: AppConfig.cardBorder),
                       ),
                       child: Padding(
                         padding: const EdgeInsets.all(24.0),
@@ -293,7 +348,7 @@ class _TramiteDetailScreenState extends State<TramiteDetailScreen> {
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
-                                color: Color(0xFF1E293B),
+                                color: AppConfig.titleColor,
                               ),
                             ),
                             const Divider(height: 32),
@@ -430,10 +485,10 @@ class _TramiteDetailScreenState extends State<TramiteDetailScreen> {
                 flex: 2,
                 child: Card(
                   elevation: 0,
-                  color: Colors.white,
+                  color: AppConfig.backgroundWhite,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
-                    side: BorderSide(color: Colors.grey[200]!),
+                    side: BorderSide(color: AppConfig.cardBorder),
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(24.0),
@@ -517,12 +572,24 @@ class _TramiteDetailScreenState extends State<TramiteDetailScreen> {
                                             child: CircularProgressIndicator(
                                                 strokeWidth: 2),
                                           )
-                                        : IconButton(
-                                            tooltip: 'Ver/Copiar Enlace',
-                                            icon: const Icon(Icons.link,
-                                                color: Colors.blue),
-                                            onPressed: () =>
-                                                _fetchAndCopyDocumentUrl(doc),
+                                        : Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              IconButton(
+                                                tooltip: 'Ver/Copiar Enlace',
+                                                icon: const Icon(Icons.link,
+                                                    color: Colors.blue),
+                                                onPressed: () =>
+                                                    _fetchAndCopyDocumentUrl(doc),
+                                              ),
+                                              IconButton(
+                                                tooltip: 'Descargar Documento',
+                                                icon: const Icon(Icons.download,
+                                                    color: Colors.green),
+                                                onPressed: () =>
+                                                    _downloadDocument(doc),
+                                              ),
+                                            ],
                                           ),
                                   ],
                                 ),
