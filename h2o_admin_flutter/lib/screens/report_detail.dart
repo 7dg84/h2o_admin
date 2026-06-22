@@ -10,6 +10,7 @@ import '../models/user_model.dart';
 import '../models/media_model.dart';
 import '../providers/report_provider.dart';
 import '../providers/user_provider.dart';
+import '../core/routes.dart';
 
 class ReportDetailScreen extends StatefulWidget {
   final String reportId;
@@ -321,7 +322,7 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Breadcrumbs & Back Button Row
-                Row(
+                Wrap(
                   children: [
                     InkWell(
                       onTap: () => Navigator.of(context).pop(true),
@@ -590,10 +591,27 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
                     child: Row(
                       children: [
                         Expanded(
-                          child: Text(
-                            _report!.user,
-                            style: const TextStyle(fontSize: 14, fontFamily: 'monospace'),
-                            overflow: TextOverflow.ellipsis,
+                          child: InkWell(
+                            onTap: () {
+                              Navigator.pushNamed(
+                                context,
+                                AppRoutes.userDetail,
+                                arguments: UserDetailArguments(
+                                  userId: _report!.user,
+                                  isEditMode: false,
+                                ),
+                              );
+                            },
+                            child: Text(
+                              _report!.user,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontFamily: 'monospace',
+                                color: Colors.blue,
+                                decoration: TextDecoration.underline,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                         ),
                         IconButton(
@@ -702,10 +720,31 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
                             ],
                             onChanged: (val) => setState(() => _selectedOperatorId = val),
                           )
-                        : Text(
-                            _getOperatorName(_report!.assignedOperatorId),
-                            style: const TextStyle(fontSize: 14),
-                          ),
+                        : (_report!.assignedOperatorId == null || _report!.assignedOperatorId!.isEmpty)
+                            ? const Text(
+                                'No asignado',
+                                style: TextStyle(fontSize: 14),
+                              )
+                            : InkWell(
+                                onTap: () {
+                                  Navigator.pushNamed(
+                                    context,
+                                    AppRoutes.userDetail,
+                                    arguments: UserDetailArguments(
+                                      userId: _report!.assignedOperatorId!,
+                                      isEditMode: false,
+                                    ),
+                                  );
+                                },
+                                child: Text(
+                                  _getOperatorName(_report!.assignedOperatorId),
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.blue,
+                                    decoration: TextDecoration.underline,
+                                  ),
+                                ),
+                              ),
                   ),
                 ),
               ],

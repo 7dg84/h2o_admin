@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/review_model.dart';
 import '../providers/review_provider.dart';
+import '../core/routes.dart';
 import 'components/reusable_crud_table.dart';
 import 'components/statistic_card.dart';
 
@@ -205,7 +206,8 @@ class _ReviewsAdminPageState extends State<ReviewsAdminPage> {
                 Expanded(
                   child: StatisticCard(
                     label: 'PROMEDIO (PÁGINA)',
-                    value: reviews.isEmpty ? '0.0' : avgRating.toStringAsFixed(1),
+                    value:
+                        reviews.isEmpty ? '0.0' : avgRating.toStringAsFixed(1),
                     icon: Icons.star,
                     color: Colors.amber[700]!,
                   ),
@@ -331,14 +333,29 @@ class _ReviewsAdminPageState extends State<ReviewsAdminPage> {
                       ),
                       Expanded(
                         flex: 2,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: Text(
-                            review.user,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(fontSize: 12),
-                          ),
+                        child: IconButton(
+                          tooltip: 'Usuario',
+                          onPressed: () {
+                            Navigator.pushNamed(
+                              context,
+                              AppRoutes.userDetail,
+                              arguments: UserDetailArguments(
+                                  userId: review.user,
+                                  isEditMode: false), // o true para edición
+                            );
+                          },
+                          icon: const Icon(Icons.person),
+                          iconSize: 20,
+                          splashRadius: 20,
                         ),
+                        // Padding(
+                        //   padding: const EdgeInsets.symmetric(horizontal: 16),
+                        //   child: Text(
+                        //     review.user,
+                        //     overflow: TextOverflow.ellipsis,
+                        //     style: const TextStyle(fontSize: 12),
+                        //   ),
+                        // ),
                       ),
                       Expanded(
                         flex: 2,
@@ -349,7 +366,9 @@ class _ReviewsAdminPageState extends State<ReviewsAdminPage> {
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               fontSize: 12,
-                              color: review.report != null ? Colors.blue : Colors.grey,
+                              color: review.report != null
+                                  ? Colors.blue
+                                  : Colors.grey,
                             ),
                           ),
                         ),
@@ -363,7 +382,9 @@ class _ReviewsAdminPageState extends State<ReviewsAdminPage> {
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               fontSize: 12,
-                              color: review.tramite != null ? Colors.blue : Colors.grey,
+                              color: review.tramite != null
+                                  ? Colors.blue
+                                  : Colors.grey,
                             ),
                           ),
                         ),
@@ -433,8 +454,10 @@ class _ReviewFilterDialogState extends State<ReviewFilterDialog> {
 
     _idController = TextEditingController(text: _filters['id'] ?? '');
     _userController = TextEditingController(text: _filters['user'] ?? '');
-    _curpController = TextEditingController(text: _filters['user__curp__icontains'] ?? '');
-    _emailController = TextEditingController(text: _filters['user__email__icontains'] ?? '');
+    _curpController =
+        TextEditingController(text: _filters['user__curp__icontains'] ?? '');
+    _emailController =
+        TextEditingController(text: _filters['user__email__icontains'] ?? '');
     _reportController = TextEditingController(text: _filters['report'] ?? '');
     _tramiteController = TextEditingController(text: _filters['tramite'] ?? '');
 
@@ -515,10 +538,12 @@ class _ReviewFilterDialogState extends State<ReviewFilterDialog> {
     }
     if (_valueController.text.isNotEmpty) {
       final key = _valueOp == 'exact' ? 'value' : 'value__$_valueOp';
-      _filters[key] = int.tryParse(_valueController.text) ?? _valueController.text;
+      _filters[key] =
+          int.tryParse(_valueController.text) ?? _valueController.text;
     }
     if (_createdAtController.text.isNotEmpty) {
-      final key = _createdAtOp == 'exact' ? 'created_at' : 'created_at__$_createdAtOp';
+      final key =
+          _createdAtOp == 'exact' ? 'created_at' : 'created_at__$_createdAtOp';
       _filters[key] = _createdAtController.text;
     }
 
@@ -677,7 +702,8 @@ class _ReviewFilterDialogState extends State<ReviewFilterDialog> {
                     child: TextField(
                       controller: _valueController,
                       decoration: InputDecoration(
-                        hintText: _valueOp == 'range' ? 'Ej. 1,3' : 'Calificación...',
+                        hintText:
+                            _valueOp == 'range' ? 'Ej. 1,3' : 'Calificación...',
                         border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(6)),
                         contentPadding: const EdgeInsets.symmetric(
@@ -693,7 +719,8 @@ class _ReviewFilterDialogState extends State<ReviewFilterDialog> {
                         DropdownMenuItem(value: 'exact', child: Text('Exacto')),
                         DropdownMenuItem(value: 'gte', child: Text('Min (>=)')),
                         DropdownMenuItem(value: 'lte', child: Text('Max (<=)')),
-                        DropdownMenuItem(value: 'range', child: Text('Rango (A,B)')),
+                        DropdownMenuItem(
+                            value: 'range', child: Text('Rango (A,B)')),
                       ],
                       onChanged: (v) => setState(() => _valueOp = v ?? 'exact'),
                       decoration: InputDecoration(
@@ -738,9 +765,12 @@ class _ReviewFilterDialogState extends State<ReviewFilterDialog> {
                       value: _createdAtOp,
                       items: const [
                         DropdownMenuItem(value: 'exact', child: Text('Exacta')),
-                        DropdownMenuItem(value: 'gte', child: Text('Desde (>=)')),
-                        DropdownMenuItem(value: 'lte', child: Text('Hasta (<=)')),
-                        DropdownMenuItem(value: 'range', child: Text('Rango (A,B)')),
+                        DropdownMenuItem(
+                            value: 'gte', child: Text('Desde (>=)')),
+                        DropdownMenuItem(
+                            value: 'lte', child: Text('Hasta (<=)')),
+                        DropdownMenuItem(
+                            value: 'range', child: Text('Rango (A,B)')),
                       ],
                       onChanged: (v) =>
                           setState(() => _createdAtOp = v ?? 'exact'),

@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../models/tramite_model.dart';
 import '../providers/tramite_provider.dart';
 import '../providers/document_provider.dart';
+import '../core/routes.dart';
 
 class TramiteDetailScreen extends StatefulWidget {
   final String tramiteId;
@@ -255,7 +256,19 @@ class _TramiteDetailScreenState extends State<TramiteDetailScreen> {
                             _buildInfoRow('Folio', '#${_tramite!.folio}'),
                             _buildInfoRow('Fecha de Creación', formattedDate),
                             _buildInfoRow(
-                                'Usuario Solicitante (ID)', _tramite!.user),
+                              'Usuario Solicitante (ID)',
+                              _tramite!.user,
+                              onTap: () {
+                                Navigator.pushNamed(
+                                  context,
+                                  AppRoutes.userDetail,
+                                  arguments: UserDetailArguments(
+                                    userId: _tramite!.user,
+                                    isEditMode: false,
+                                  ),
+                                );
+                              },
+                            ),
                           ],
                         ),
                       ),
@@ -528,7 +541,7 @@ class _TramiteDetailScreenState extends State<TramiteDetailScreen> {
     );
   }
 
-  Widget _buildInfoRow(String label, String value) {
+  Widget _buildInfoRow(String label, String value, {VoidCallback? onTap}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
       child: Row(
@@ -545,13 +558,25 @@ class _TramiteDetailScreenState extends State<TramiteDetailScreen> {
             ),
           ),
           Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(
-                color: Color(0xFF334155),
-                fontWeight: FontWeight.w500,
-              ),
-            ),
+            child: onTap != null
+                ? InkWell(
+                    onTap: onTap,
+                    child: Text(
+                      value,
+                      style: const TextStyle(
+                        color: Colors.blue,
+                        fontWeight: FontWeight.w500,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  )
+                : Text(
+                    value,
+                    style: const TextStyle(
+                      color: Color(0xFF334155),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
           ),
         ],
       ),

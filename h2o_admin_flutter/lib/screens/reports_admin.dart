@@ -41,7 +41,9 @@ class _ReportsAdminPageState extends State<ReportsAdminPage> {
 
   void _loadData() {
     setState(() => _loading = true);
-    context.read<ReportProvider>().fetchAllReports(search: _searchController.text, filters: _filters);
+    context
+        .read<ReportProvider>()
+        .fetchAllReports(search: _searchController.text, filters: _filters);
     context.read<ReportProvider>().fetchPendingReports();
     context.read<ReportProvider>().fetchAttentionReports();
     context.read<ReportProvider>().fetchSolvedReports();
@@ -211,7 +213,8 @@ class _ReportsAdminPageState extends State<ReportsAdminPage> {
                     // },
                     onSubmitted: (value) {
                       setState(() => _currentPage = 1);
-                      reportProvider.fetchAllReports(search: value, filters: _filters);
+                      reportProvider.fetchAllReports(
+                          search: value, filters: _filters);
                     },
                   ),
                 ),
@@ -249,15 +252,14 @@ class _ReportsAdminPageState extends State<ReportsAdminPage> {
                         ? null
                         : () async {
                             try {
-                              final success = await context
-                                  .read<ReportProvider>()
-                                  .toCSV();
+                              final success =
+                                  await context.read<ReportProvider>().toCSV();
                               if (!mounted) return;
                               if (success) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
-                                    content: Text(
-                                        'Reportes exportados con éxito.'),
+                                    content:
+                                        Text('Reportes exportados con éxito.'),
                                     backgroundColor: Colors.green,
                                   ),
                                 );
@@ -409,26 +411,35 @@ class _ReportsAdminPageState extends State<ReportsAdminPage> {
                                         IconButton(
                                           tooltip: 'Eliminar',
                                           onPressed: () async {
-                                            final confirm = await showDialog<bool>(
+                                            final confirm =
+                                                await showDialog<bool>(
                                               context: context,
                                               builder: (ctx) => AlertDialog(
-                                                title: const Text('Eliminar reporte'),
+                                                title: const Text(
+                                                    'Eliminar reporte'),
                                                 content: Text(
                                                     '¿Estás seguro de que deseas eliminar el reporte #${report.folio}?'),
                                                 actions: [
                                                   TextButton(
                                                     onPressed: () =>
-                                                        Navigator.of(ctx).pop(false),
-                                                    child: const Text('Cancelar'),
+                                                        Navigator.of(ctx)
+                                                            .pop(false),
+                                                    child:
+                                                        const Text('Cancelar'),
                                                   ),
                                                   ElevatedButton(
-                                                    style: ElevatedButton.styleFrom(
-                                                      backgroundColor: Colors.red,
-                                                      foregroundColor: Colors.white,
+                                                    style: ElevatedButton
+                                                        .styleFrom(
+                                                      backgroundColor:
+                                                          Colors.red,
+                                                      foregroundColor:
+                                                          Colors.white,
                                                     ),
                                                     onPressed: () =>
-                                                        Navigator.of(ctx).pop(true),
-                                                    child: const Text('Eliminar'),
+                                                        Navigator.of(ctx)
+                                                            .pop(true),
+                                                    child:
+                                                        const Text('Eliminar'),
                                                   ),
                                                 ],
                                               ),
@@ -438,7 +449,8 @@ class _ReportsAdminPageState extends State<ReportsAdminPage> {
                                                   .read<ReportProvider>()
                                                   .deleteReport(report.id);
                                               if (success) {
-                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                ScaffoldMessenger.of(context)
+                                                    .showSnackBar(
                                                   const SnackBar(
                                                     content: Text(
                                                         'Reporte eliminado con éxito'),
@@ -446,7 +458,8 @@ class _ReportsAdminPageState extends State<ReportsAdminPage> {
                                                 );
                                                 _loadData();
                                               } else {
-                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                ScaffoldMessenger.of(context)
+                                                    .showSnackBar(
                                                   const SnackBar(
                                                     content: Text(
                                                         'Error al eliminar el reporte'),
@@ -457,6 +470,22 @@ class _ReportsAdminPageState extends State<ReportsAdminPage> {
                                           },
                                           icon: const Icon(Icons.delete,
                                               color: Colors.red),
+                                          iconSize: 20,
+                                          splashRadius: 20,
+                                        ),
+                                        IconButton(
+                                          tooltip: 'Usuario',
+                                          onPressed: () {
+                                            Navigator.pushNamed(
+                                              context,
+                                              AppRoutes.userDetail,
+                                              arguments: UserDetailArguments(
+                                                  userId: report.user,
+                                                  isEditMode:
+                                                      false), // o true para edición
+                                            );
+                                          },
+                                          icon: const Icon(Icons.person),
                                           iconSize: 20,
                                           splashRadius: 20,
                                         ),
@@ -739,4 +768,3 @@ class _AssignDialogState extends State<AssignDialog> {
     );
   }
 }
-

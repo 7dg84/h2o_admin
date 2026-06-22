@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/user_model.dart';
 import '../providers/user_provider.dart';
+import '../core/routes.dart';
 import 'components/reusable_crud_table.dart';
 import 'components/statistic_card.dart';
 
@@ -301,9 +302,28 @@ class _UsersAdminPageState extends State<UsersAdminPage> {
                         flex: 2,
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: Text(
-                            user.email,
-                            style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blue),
+                          child: InkWell(
+                            onTap: () async {
+                              final result = await Navigator.pushNamed(
+                                context,
+                                AppRoutes.userDetail,
+                                arguments: UserDetailArguments(
+                                  userId: user.id,
+                                  isEditMode: false,
+                                ),
+                              );
+                              if (result == true) {
+                                _loadData();
+                              }
+                            },
+                            child: Text(
+                              user.email,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.blue,
+                                decoration: TextDecoration.underline,
+                              ),
+                            ),
                           ),
                         ),
                       ),
@@ -352,10 +372,22 @@ class _UsersAdminPageState extends State<UsersAdminPage> {
                       ),
                       Expanded(
                         flex: 1,
-                        child: Row(
+                        child: Wrap(
                           children: [
                             IconButton(
-                              onPressed: () => _openUserFormDialog(user),
+                              onPressed: () async {
+                                final result = await Navigator.pushNamed(
+                                  context,
+                                  AppRoutes.userDetail,
+                                  arguments: UserDetailArguments(
+                                    userId: user.id,
+                                    isEditMode: true,
+                                  ),
+                                );
+                                if (result == true) {
+                                  _loadData();
+                                }
+                              },
                               icon: const Icon(Icons.edit, color: Colors.grey),
                               iconSize: 20,
                               splashRadius: 20,

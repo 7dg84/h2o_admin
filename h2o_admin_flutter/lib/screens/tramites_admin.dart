@@ -138,14 +138,10 @@ class _TramitesAdminPageState extends State<TramitesAdminPage> {
     // Stats calculations
     int createdCount =
         tramites.where((t) => t.status.toLowerCase() == 'creado').length;
-    int inProgressCount = tramites
-        .where((t) =>
-            t.status.toLowerCase() == 'en tramite')
-        .length;
-    int approvedCount = tramites
-        .where((t) =>
-            t.status.toLowerCase() == 'completado')
-        .length;
+    int inProgressCount =
+        tramites.where((t) => t.status.toLowerCase() == 'en tramite').length;
+    int approvedCount =
+        tramites.where((t) => t.status.toLowerCase() == 'completado').length;
 
     return SingleChildScrollView(
       child: Padding(
@@ -370,16 +366,31 @@ class _TramitesAdminPageState extends State<TramitesAdminPage> {
                         flex: 2,
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: Text(
-                            tramite.user,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(fontSize: 12),
+                          child: IconButton(
+                            tooltip: 'Usuario',
+                            onPressed: () {
+                              Navigator.pushNamed(
+                                context,
+                                AppRoutes.userDetail,
+                                arguments: UserDetailArguments(
+                                    userId: tramite.user,
+                                    isEditMode: false), // o true para edición
+                              );
+                            },
+                            icon: const Icon(Icons.person),
+                            iconSize: 20,
+                            splashRadius: 20,
                           ),
+                          // Text(
+                          //   tramite.user,
+                          //   overflow: TextOverflow.ellipsis,
+                          //   style: const TextStyle(fontSize: 12),
+                          // ),
                         ),
                       ),
                       Expanded(
                         flex: 2,
-                        child: Row(
+                        child: Wrap(
                           children: [
                             IconButton(
                               tooltip: 'Ver Detalle',

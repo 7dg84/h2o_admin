@@ -61,6 +61,15 @@ class UserService {
     }
   }
 
+  Future<UserModel> getById(String id) async {
+    try {
+      final response = await _apiService.get('/users/$id/');
+      return UserModel.fromJson(response.data);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<void> delete(String id) async {
     try {
       await _apiService.delete('/users/$id/');

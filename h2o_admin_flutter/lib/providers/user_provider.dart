@@ -113,4 +113,20 @@ class UserProvider with ChangeNotifier {
       return false;
     }
   }
+
+  Future<UserModel?> getUserDetail(String id) async {
+    _isLoading = true;
+    _lastError = null;
+    Future.microtask(() => notifyListeners());
+    try {
+      final user = await _userService.getById(id);
+      return user;
+    } catch (e) {
+      _lastError = e.toString();
+      return null;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 }

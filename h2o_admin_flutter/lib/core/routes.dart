@@ -3,6 +3,7 @@ import '../screens/login.dart';
 import '../screens/admin_home.dart';
 import '../screens/report_detail.dart';
 import '../screens/tramite_detail.dart';
+import '../screens/user_detail_dialog.dart';
 
 /// Nombres de rutas de la aplicación
 class AppRoutes {
@@ -12,6 +13,7 @@ class AppRoutes {
   static const String admin = '/admin';
   static const String reportDetail = '/report-detail';
   static const String tramiteDetail = '/tramite-detail';
+  static const String userDetail = '/user-detail';
 
   /// Generador de rutas
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -46,6 +48,18 @@ class AppRoutes {
           ),
           settings: settings,
         );
+      case userDetail:
+        final args = settings.arguments as UserDetailArguments;
+        return PageRouteBuilder(
+          opaque: false,
+          barrierDismissible: true,
+          barrierColor: Colors.black54,
+          pageBuilder: (context, _, __) => UserDetailDialogScreen(
+            userId: args.userId,
+            isEditMode: args.isEditMode,
+          ),
+          settings: settings,
+        );
       default:
         return MaterialPageRoute(
           builder: (_) => Scaffold(
@@ -75,6 +89,16 @@ class TramiteDetailArguments {
 
   TramiteDetailArguments({
     required this.tramiteId,
+    this.isEditMode = false,
+  });
+}
+
+class UserDetailArguments {
+  final String userId;
+  final bool isEditMode;
+
+  UserDetailArguments({
+    required this.userId,
     this.isEditMode = false,
   });
 }

@@ -56,7 +56,6 @@ class TramiteService {
     try {
       final response = await _apiService.post('/tramites/$id/change_status/',
           data: tramiteData);
-      print(response.data);
       if (response.data['status'] != 'ok') {
         throw response.data['status'];
       }

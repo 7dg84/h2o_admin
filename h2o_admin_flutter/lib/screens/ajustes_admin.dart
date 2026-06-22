@@ -386,7 +386,7 @@ class _DocumentTypesTabState extends State<_DocumentTypesTab> {
                         child: Text(doc.description))),
                 Expanded(
                   flex: 1,
-                  child: Row(
+                  child: Wrap(
                     children: [
                       IconButton(
                           icon: const Icon(Icons.edit, color: Colors.blue),
@@ -753,7 +753,7 @@ class _ServicesTabState extends State<_ServicesTab> {
                 ),
                 Expanded(
                   flex: 1,
-                  child: Row(
+                  child: Wrap(
                     children: [
                       IconButton(
                           icon: const Icon(Icons.edit, color: Colors.blue),
@@ -1227,7 +1227,7 @@ class _ServiceRequirementsTabState extends State<_ServiceRequirementsTab> {
                                 fontSize: 13)))),
                 Expanded(
                   flex: 1,
-                  child: Row(
+                  child: Wrap(
                     children: [
                       IconButton(
                           icon: const Icon(Icons.edit, color: Colors.blue),
@@ -1553,7 +1553,7 @@ class _PaymentsTabState extends State<_PaymentsTab> {
                                   color: Colors.green)))),
                   Expanded(
                     flex: 1,
-                    child: Row(
+                    child: Wrap(
                       children: [
                         IconButton(
                             icon: const Icon(Icons.edit, color: Colors.blue),
